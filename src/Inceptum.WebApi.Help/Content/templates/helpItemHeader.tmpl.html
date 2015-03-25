@@ -1,0 +1,19 @@
+﻿<a data-bind="attr: { id: tableOfContentId }" data-js-anchor="true"></a>
+<!-- ko if: level <= 1 -->
+<h1 data-bind="text: title" class="w50pc"></h1>
+<!-- /ko -->
+<!-- ko if: level == 2 -->
+<h2 data-bind="text: title" class="w50pc"></h2>
+<!-- /ko -->
+<!-- ko if: level == 3 -->
+<h3 data-bind="text: title" class="w50pc"></h3>
+<!-- /ko -->
+<!-- ko if: level == 4 -->
+<h4 data-bind="text: title" class="w50pc"></h4>
+<!-- /ko -->
+<!-- ko if: level == 5 -->
+<h5 data-bind="text: title" class="w50pc"></h5>
+<!-- /ko -->
+<!-- ko if: level > 5 -->
+<h6 data-bind="text: title" class="w50pc"></h6>
+<!-- /ko -->

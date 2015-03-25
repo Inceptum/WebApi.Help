@@ -1,0 +1,25 @@
+﻿<div class="w50pc">
+    <p>
+        API uses conventional HTTP response codes to indicate success or failure of an API request.
+        In general, codes in the 2xx range indicate success, codes in the 4xx range indicate an error that resulted from the provided information (e.g. a required parameter was missing, a charge failed, etc.).
+        Codes in the 5xx range indicate an error on server's side.<br />
+        Extended error information may be transfered in HTTP response body.
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th width="70px" class="h-centered">Code</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: $data">
+            <tr>
+                <td class="h-centered">
+                    <strong data-bind="text: code"></strong>
+                </td>
+                <td data-bind="text: description"></td>
+            </tr>
+        </tbody>
+    </table>
+    <br/>
+</div>

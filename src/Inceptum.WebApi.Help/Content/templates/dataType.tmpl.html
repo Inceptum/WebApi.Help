@@ -1,0 +1,41 @@
+﻿<div class="w50pc">
+    <p data-bind="text: documentation"></p>
+    <!-- ko if: $data.properties && $data.properties.length > 0 -->
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>                
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: $data.properties">
+            <tr>
+                <td data-bind="text: $data.name"></td>
+                <td data-bind="text: $data.typeDescription.name"></td>
+                <td data-bind="text: $data.documentation"></td>                
+            </tr>
+        </tbody>
+    </table>
+    <!-- /ko -->
+    
+    <!-- ko if: $data.values && $data.values.length > 0 -->
+     <table>
+        <thead>
+            <tr>
+                <th>String value</th>
+                <th>Integer value</th>
+                <th>Documentation</th>                
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: $data.values">
+            <tr>
+                <td data-bind="text: $data.name"></td>
+                <td data-bind="text: $data.value"></td>
+                <td data-bind="text: $data.documentation"></td>                
+            </tr>
+        </tbody>
+    </table>
+    <!-- /ko -->
+    <div class="clear">&nbsp;</div>
+</div>

@@ -1,0 +1,164 @@
+﻿html {
+    height: 100%; min-height: 100%;    
+}
+
+body {
+    height: 100%; min-height: 100%; 
+    font-family: Arial,sans-serif; font-size: 12px;    
+}
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, button, textarea, p, blockquote, th, td {
+    margin: 0; padding: 0;
+}
+
+ul, li { list-style: outside none none; }
+
+p { margin: 1.5em 0; }
+
+a { color: #008cdd; cursor: pointer; text-decoration: none; }
+
+b, strong { font-weight: bold; }
+
+pre, code {
+    font-family: "Lucida Console";
+}
+
+.hidden { display: none !important; }
+.fl { float: left; }
+.fr { float: right; }
+.w50pc { width: 50%; }
+.h-centered { text-align: center; }
+.v-centered { vertical-align: middle; }
+.clear { clear: both;padding: 0;margin: 0 }
+
+table { border: none;border-collapse: collapse;border-spacing: 0;display: block;}
+table thead { background-color: #e8ebef;}
+table th, table td {
+    border: none; padding: 5px 10px;text-align: left;vertical-align: middle;border-bottom: 1px solid #e8ebef;
+}
+
+/* Language box */
+.lang-box {
+    color: black; background-color: white; font-size: 12px;
+    position: fixed; right: 0; top: 0;
+    display: block; margin: 0; padding: 4px 8px; width: 40px; z-index: 100;
+    border: 2px solid black;
+}
+
+.lang-box a, .lang-box a:hover, .lang-box a:active, .lang-box a:visited { text-decoration: none; }
+
+/* Table of contents */
+.toc {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 300px; height: 100%; overflow-x: hidden; overflow-y: auto;
+    background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)) no-repeat scroll 0 0 #e8ebef;
+    border-right: 1px solid #dadfe5;
+}
+
+.toc:before, .toc:after {
+    content: ""; display: block; height: 15px;
+}
+
+.toc-list {
+    padding: 0; margin: 0; display: block;
+}
+
+.toc-list.nested li {
+    padding-left: 20px;
+}
+
+.toc-list a {
+    display: block; height: 22px; line-height: 22px; padding: 0 20px;
+    font-size: 12px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    border-style: none;
+}
+
+.toc-list a:hover, .toc-list a:active {
+    color: black; text-decoration: underline; font-weight: normal;
+}
+
+.toc-list a.selected {
+    background: linear-gradient(#4f9fef, #3577d0) repeat scroll 0 0 #4f9fef;
+    color: #fff; border-bottom-color: #2357aa; border-right-color: #008cdd; border-top-color: #3b89e9;
+    font-weight: bold; text-decoration: none; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Page content */
+.content-wrap {
+    margin: 0 0 0 315px; position: relative;
+}
+
+.dark-box {
+    background-color: #393939;
+    position: absolute; right: 0; top: 0; bottom: 0; width: 50%; z-index: -1;
+}
+
+.content {
+    line-height: 1.9em; padding-top: 15px;
+}
+
+.content h1 { font-size: 28px; }
+.content h2 { font-size: 23px; }
+.content h3 { font-size: 20px; }
+.content h4 { font-size: 18px; }
+.content h5 { font-size: 16px; }
+.content h6 { font-size: 14px; }
+
+.content .api-method {
+    overflow: hidden;position: relative;margin-bottom: 2.2em; border-top:1px dotted #ccc
+}
+
+.content .method-group-doc {
+     margin-top: 0.7em;    
+}
+
+.content .method-doc {
+     margin-top: 0.7em;    
+}
+
+.content .method-uri {
+    font-family: "Lucida Console"; /*font-weight: bold;*/
+    background-color: #e8ebef; font-size: 12px; line-height: 22px; 
+    display: inline-block; padding: 2px 4px;      
+}
+
+.content pre, .content blockquote {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    background-color: #292929;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+ /*   clear: right;*/
+    color: #fff;
+    margin: 0;
+    padding: 1.5em 18px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.content pre { margin-bottom: 5em;
+               margin-right: 1em;
+}
+
+.content pre > p, .content blockquote > p { margin: 0 }
+
+.content pre a, .content blockquote a {
+    border-bottom: dashed 1px #ccc;
+    color: #fff;
+    text-decoration: none;
+}
+
+.content blockquote > p {
+    background-color: #1c1c1c;
+    border-bottom: 1px solid #404040;
+    border-radius: 5px;
+    border-top: 1px solid #000;
+    color: #ccc;
+    padding: 13px;
+}
+
+/* Code highlighter */
+.json.number { color: white }
+.json.key { color: #e5da78; }
+.json.string { color: #e5da78; }
+.json.boolean { color: #f92672; }
+.json.null { color: #f92672;}

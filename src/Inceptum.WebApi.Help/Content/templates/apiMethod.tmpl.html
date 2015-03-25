@@ -1,0 +1,91 @@
+﻿<div class="api-method">
+    <div class="w50pc fr">
+        <div data-bind="with: sampleRequest">
+            <blockquote>
+                <p>Request sample:</p>
+            </blockquote>
+            <pre class="json" data-bind="code: { value: content, syntax: 'json' }"></pre>
+        </div>
+        <div data-bind="with: sampleResponse">
+            <blockquote>
+                <p>Response sample:</p>
+            </blockquote>
+            <pre class="json" data-bind="code: { value: content, syntax: 'json' }"></pre>
+        </div>
+    </div>
+    <div class="w50pc fl">
+        <p class="method-doc" data-bind="text: documentation"></p>        
+        <p>            
+            <span class="method-uri"><span data-bind="text: httpMethod"></span>&nbsp;<span data-bind="text: fullPath"></span></span>
+        </p>
+        <!-- ko if: uriParameters.length != 0 -->
+        <strong>Query string parameters</strong><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Annotation</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: uriParameters">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                    <td data-bind="text: annotations"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+
+        <!-- ko with: requestBody -->     
+        <p>
+            <strong>Request description</strong><br/>
+            <span data-bind="text: documentation || typeName"></span>            
+        </p>                
+        <table data-bind="if: properties.length > 0">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Annotation</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: properties">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                    <td data-bind="text: annotations"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+
+        <!-- ko with: responseBody -->
+         <p>
+            <strong>Response description</strong><br/>
+            <span data-bind="text: documentation || typeName"></span>            
+        </p>
+        <table data-bind="if: properties.length > 0">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: properties">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+    </div>
+</div>

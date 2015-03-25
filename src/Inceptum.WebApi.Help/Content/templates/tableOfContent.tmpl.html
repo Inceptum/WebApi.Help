@@ -1,0 +1,14 @@
+﻿<ul data-bind='template: { name: "node", foreach: children  }' class="toc-list">
+</ul>
+<script id='node' type='text/html'>
+    <li>
+        <!-- ko if: (referenceId) -->
+            <a data-bind="text: text, attr: { href: '#' + referenceId, title: text }"></a>
+        <!-- /ko -->       
+        <!-- ko if: !(referenceId) -->
+            <a data-bind="text: text"></a>
+        <!-- /ko -->
+        <ul data-bind='template: { name: "node", foreach: children }' class="toc-list nested hidden">
+        </ul>
+    </li>
+</script>

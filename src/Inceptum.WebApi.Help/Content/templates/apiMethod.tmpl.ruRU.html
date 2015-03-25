@@ -1,0 +1,91 @@
+﻿<div class="api-method">
+    <div class="w50pc fr">
+        <div data-bind="with: sampleRequest">
+            <blockquote>
+                <p>Пример запроса:</p>
+            </blockquote>
+            <pre class="json" data-bind="code: { value: content, syntax: 'json' }"></pre>
+        </div>
+        <div data-bind="with: sampleResponse">
+            <blockquote>
+                <p>Пример ответа:</p>
+            </blockquote>
+            <pre class="json" data-bind="code: { value: content, syntax: 'json' }"></pre>
+        </div>
+    </div>
+    <div class="w50pc fl">
+        <p class="method-doc" data-bind="text: documentation"></p>        
+        <p>            
+            <span class="method-uri"><span data-bind="text: httpMethod"></span>&nbsp;<span data-bind="text: fullPath"></span></span>
+        </p>
+        <!-- ko if: uriParameters.length != 0 -->
+        <strong>Параметры строки запроса</strong><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Тип</th>
+                    <th>Описание</th>
+                    <th>Дополнительно</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: uriParameters">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                    <td data-bind="text: annotations"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+
+        <!-- ko with: requestBody -->     
+        <p>
+            <strong>Описание запроса</strong><br/>
+            <span data-bind="text: documentation || typeName"></span>            
+        </p>                
+        <table data-bind="if: properties.length > 0">
+            <thead>
+                <tr>
+                    <th>Поле</th>
+                    <th>Тип данных</th>
+                    <th>Описание</th>
+                    <th>Дополнительно</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: properties">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                    <td data-bind="text: annotations"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+
+        <!-- ko with: responseBody -->
+         <p>
+            <strong>Описание ответа</strong><br/>
+            <span data-bind="text: documentation || typeName"></span>            
+        </p>
+        <table data-bind="if: properties.length > 0">
+            <thead>
+                <tr>
+                    <th>Поле</th>
+                    <th>Тип данных</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: properties">
+                <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: (typeDocumentation || typeName)"></td>
+                    <td data-bind="text: documentation"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- /ko -->
+    </div>
+</div>

@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3451254D-D23E-4321-893D-34302EEE1F6C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Inceptum.WebApi.Help</RootNamespace>
+    <AssemblyName>Inceptum.WebApi.Help</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="itextsharp">
+      <HintPath>..\packages\iTextSharp.5.5.5\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.SelfHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.SelfHost.5.2.3\lib\net45\System.Web.Http.SelfHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Builders\ApiDocumentationBuilder.cs" />
+    <Compile Include="Builders\DelegatingBuilder.cs" />
+    <Compile Include="Builders\ErrorsDocumentationBuilder.cs" />
+    <Compile Include="Builders\TypesDocumentationBuilder.cs" />
+    <Compile Include="DefaultPdfTemplateProvider.cs" />
+    <Compile Include="ExtendedApiDescription.cs" />
+    <Compile Include="ExtendedApiExplorer.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\UtilityExtensions.cs" />
+    <Compile Include="HelpPageModel.cs" />
+    <Compile Include="HelpProvider.cs" />
+    <Compile Include="IExtendedApiExplorer.cs" />
+    <Compile Include="Builders\IHelpBuilder.cs" />
+    <Compile Include="LocalizableContentProvider.cs" />
+    <Compile Include="Resources\Fonts.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Fonts.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Strings.ru.Designer.cs">
+      <DependentUpon>Strings.ru.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="CultureAwareApiExplorer.cs" />
+    <Compile Include="IExtendedDocumentationProvider.cs" />
+    <Compile Include="HelpPageConfiguration.cs" />
+    <Compile Include="HelpPageConfigurationExtensions.cs" />
+    <Compile Include="HelpPageHandler.cs" />
+    <Compile Include="IContentProvider.cs" />
+    <Compile Include="IHelpProvider.cs" />
+    <Compile Include="ModelDescriptions\CollectionModelDescription.cs" />
+    <Compile Include="ModelDescriptions\ComplexTypeModelDescription.cs" />
+    <Compile Include="ModelDescriptions\DictionaryModelDescription.cs" />
+    <Compile Include="ModelDescriptions\EnumTypeModelDescription.cs" />
+    <Compile Include="ModelDescriptions\EnumValueDescription.cs" />
+    <Compile Include="ModelDescriptions\IModelDocumentationProvider.cs" />
+    <Compile Include="ModelDescriptions\KeyValuePairModelDescription.cs" />
+    <Compile Include="ModelDescriptions\ModelDescription.cs" />
+    <Compile Include="ModelDescriptions\ModelDescriptionGenerator.cs" />
+    <Compile Include="ModelDescriptions\ModelNameAttribute.cs" />
+    <Compile Include="ModelDescriptions\ModelNameHelper.cs" />
+    <Compile Include="ModelDescriptions\ParameterAnnotation.cs" />
+    <Compile Include="ModelDescriptions\ParameterDescription.cs" />
+    <Compile Include="ModelDescriptions\SimpleTypeModelDescription.cs" />
+    <Compile Include="EmbeddedResourcesContentProvider.cs" />
+    <Compile Include="SampleGeneration\HelpPageSampleGenerator.cs" />
+    <Compile Include="SampleGeneration\HelpPageSampleKey.cs" />
+    <Compile Include="SampleGeneration\InvalidSample.cs" />
+    <Compile Include="SampleGeneration\ObjectGenerator.cs" />
+    <Compile Include="SampleGeneration\SampleDirection.cs" />
+    <Compile Include="SampleGeneration\TextSample.cs" />
+    <Compile Include="Extensions\StreamExtensions.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="XmlDocumentationProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Fonts.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings.ru.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.ru.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Inceptum.WebApi.Help.nuspec" />
+    <None Include="packages.config" />
+    <None Include="Resources\arial.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\js\jquery-1.10.1.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\js\help-page.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\js\knockout-3.2.0.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\js\ko-bindings.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\errorCodes.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\apiMethod.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\js\ko-ExternalTemplateEngine_all.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\tableOfContent.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\apiMethod.tmpl.ruRU.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\errorCodes.tmpl.ruRU.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\apiMethodGroup.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\helpItemHeader.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\css\screen.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\dataType.tmpl.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\templates\dataType.tmpl.ruRU.html" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+</Project>
