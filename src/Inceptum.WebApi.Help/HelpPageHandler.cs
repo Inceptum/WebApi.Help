@@ -10,9 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Inceptum.WebApi.Help.Builders;
 using Inceptum.WebApi.Help.Resources;
 
 namespace Inceptum.WebApi.Help
@@ -28,7 +25,6 @@ namespace Inceptum.WebApi.Help
         private readonly IHelpProvider m_HelpProvider;
         private readonly List<Tuple<IPdfTemplateProvider, int>> m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>();
         private BaseFont m_ArialFont;
-
 
         public HelpPageHandler(HelpPageConfiguration configuration, IHelpProvider helpProvider, IContentProvider contentProvider, IEnumerable<Tuple<IPdfTemplateProvider, int>> pdfTemplateProviders)
         {
@@ -74,17 +70,18 @@ namespace Inceptum.WebApi.Help
             {
                 // api/help/pdf => pdf
                 case "pdf":
+                    var pdfContent = createHelpPdf();
                     var pdfResponse = new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new ByteArrayContent(createPdf())
+                        Content = new ByteArrayContent(pdfContent)
                     };
                     pdfResponse.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
                     return Task.FromResult(pdfResponse);
 
-
                 // api/help/metadata => metadata JSON
                 case "metadata":
-                    return Task.FromResult(request.CreateResponse(HttpStatusCode.OK, m_HelpProvider.GetHelp(), "application/json"));
+                    var metadata = m_HelpProvider.GetHelp();
+                    return Task.FromResult(request.CreateResponse(HttpStatusCode.OK, metadata, "application/json"));
 
                 // api/help/index.html, /api/help/css/site.css, /api/help/js/site.js etc.
                 default:
@@ -107,12 +104,11 @@ namespace Inceptum.WebApi.Help
             return base.SendAsync(request, cancellationToken);
         }
 
-        private byte[] createPdf()
+        private byte[] createHelpPdf()
         {
             var stream = new MemoryStream();
             
             var document = new Document(PageSize.A4, 30, 30, 30, 30);
-
            
             using (PdfWriter.GetInstance(document, stream))
             {
@@ -132,9 +128,7 @@ namespace Inceptum.WebApi.Help
                 document.Close();
             }
 
-
             return stream.ToArray();
-
         }
 
         private IEnumerable<Section> createPdfSections(HelpPageModel help,IEnumerable<TableOfContentItem> tocItems,Section parent,int level)
@@ -224,15 +218,5 @@ namespace Inceptum.WebApi.Help
             // api/help -> api/help/index.html
             return resourceName;
         }
-
-
-
-        private Tuple<IPdfTemplateProvider, int> findPdfTemplateProvider(Type actualType)
-        {
-            if (actualType == null) throw new ArgumentNullException("actualType");
-
-            return m_PdfTemplateProviders.FirstOrDefault(x => x.Item1.GetType() == actualType);
-        }
-
     }
 }
