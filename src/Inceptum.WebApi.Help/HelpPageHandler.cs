@@ -32,18 +32,18 @@ namespace Inceptum.WebApi.Help
             if (contentProvider == null) throw new ArgumentNullException("contentProvider");
             if (helpProvider == null) throw new ArgumentNullException("helpProvider");
             m_ArialFont = BaseFont.CreateFont("arial.ttf", BaseFont.IDENTITY_H, true, true, Fonts.arial, null, true);
-/*
-            var font = BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, false);
-            iTextSharp.text.Font font20 = iTextSharp.text.FontFactory.GetFont
-            (iTextSharp.text.FontFactory.HELVETICA, 20);
-*/
+            /*
+                        var font = BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, false);
+                        iTextSharp.text.Font font20 = iTextSharp.text.FontFactory.GetFont
+                        (iTextSharp.text.FontFactory.HELVETICA, 20);
+            */
             m_ArialFont.Subset = true;
-              
-           
+
+
             m_Configuration = configuration;
             m_ContentProvider = contentProvider;
             m_HelpProvider = helpProvider;
-            m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>(pdfTemplateProviders.OrderBy(p=>p.Item2));
+            m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>(pdfTemplateProviders.OrderBy(p => p.Item2));
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -107,15 +107,15 @@ namespace Inceptum.WebApi.Help
         private byte[] createHelpPdf()
         {
             var stream = new MemoryStream();
-            
+
             var document = new Document(PageSize.A4, 30, 30, 30, 30);
-           
+
             using (PdfWriter.GetInstance(document, stream))
             {
                 document.Open();
                 var help = m_HelpProvider.GetHelp();
                 bool first = true;
-                foreach (var chapter in createPdfSections(help,help.TableOfContent.Children, null, 1))
+                foreach (var chapter in createPdfSections(help, help.TableOfContent.Children, null, 1))
                 {
 
                     if (chapter is Chapter && !first)
@@ -131,21 +131,21 @@ namespace Inceptum.WebApi.Help
             return stream.ToArray();
         }
 
-        private IEnumerable<Section> createPdfSections(HelpPageModel help,IEnumerable<TableOfContentItem> tocItems,Section parent,int level)
+        private IEnumerable<Section> createPdfSections(HelpPageModel help, IEnumerable<TableOfContentItem> tocItems, Section parent, int level)
         {
-            var sections=new List<Section>();
+            var sections = new List<Section>();
             foreach (var tocItem in tocItems)
             {
                 var item = help.Items.FirstOrDefault(i => i.TableOfContentId == tocItem.ReferenceId);
                 var title = new Paragraph(tocItem.Text, new Font(m_ArialFont, 12));
                 var section = level == 1 ? new Chapter(title, level) : parent.AddSection(20f, title, level);
-                
-                if (item != null )
+
+                if (item != null)
                 {
                     if (item.Data != null && item.Template != null)
                     {
                         //section.Add(new Paragraph(JsonConvert.SerializeObject(item.Data, Formatting.Indented)));
-                        var paragraph=m_PdfTemplateProviders.Select(x => x.Item1.GetTemplate(item.Template,item.Data, m_ArialFont)).FirstOrDefault(p=>p!=null);
+                        var paragraph = m_PdfTemplateProviders.Select(x => x.Item1.GetTemplate(item.Template, item.Data, m_ArialFont)).FirstOrDefault(p => p != null);
 
                         if (paragraph != null)
                         {
@@ -153,7 +153,7 @@ namespace Inceptum.WebApi.Help
                         }
                     }
                 }
-                createPdfSections(help,tocItem.Children, section, level + 1);
+                createPdfSections(help, tocItem.Children, section, level + 1);
                 sections.Add(section);
             }
             return sections;

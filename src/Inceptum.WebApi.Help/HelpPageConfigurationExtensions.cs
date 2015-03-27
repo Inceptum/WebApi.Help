@@ -184,10 +184,10 @@ namespace Inceptum.WebApi.Help
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Response, controllerName, actionName, parameterNames), type);
         }
 
-        internal static string GetBaseAddress(this HttpConfiguration config)
+        internal static Uri GetBaseAddress(this HttpConfiguration config)
         {
             var sfConfig = config as HttpSelfHostConfiguration;
-            return sfConfig != null ? sfConfig.BaseAddress.ToString() : config.VirtualPathRoot;
+            return sfConfig != null ? sfConfig.BaseAddress : null;
         }
 
         internal static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)

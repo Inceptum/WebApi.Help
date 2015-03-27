@@ -46,12 +46,7 @@ namespace Inceptum.WebApi.Help
             get { return InnerDescription.RelativePath; }
             set { InnerDescription.RelativePath = value; }
         }
-
-        /// <summary>
-        /// Gets or sets the base path for the API.
-        /// </summary>
-        public string BaseAddress { get; set; }        
-
+       
         /// <summary>
         /// Gets or sets the action descriptor that will handle the API.
         /// </summary>       

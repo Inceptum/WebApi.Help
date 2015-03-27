@@ -45,6 +45,7 @@ namespace Sandbox
                 help =>
                 {
                     help.UriPrefix = "/api/help";
+                    help.SamplesBaseUri = new Uri("http://api.mydomain.org:9999");
                     help.WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
                         .WithContentProvider(help.DefaultContentProvider)
                         .RegisterHelpBuilder(new DelegatingBuilder(addDynamicContent))
@@ -60,7 +61,7 @@ namespace Sandbox
                     { typeof(ExtraData),new ExtraData { Data = "Some additional data" } }
                 });
 
-            // Specific sample data configuration
+            // Per-request samples configuration. Note the value here is expected be a string.
             config.SetSampleResponse(JObject.FromObject(new 
                 {
                     name = "Just created user",

@@ -13,26 +13,26 @@ namespace Inceptum.WebApi.Help.Builders
     /// </summary>
     public class ApiDocumentationBuilder : IHelpBuilder
     {
-        private readonly HttpConfiguration m_HttpConfiguration;
+        private readonly HelpPageConfiguration m_HelpPageConfiguration;
         private readonly string m_TocRoot;
         private Lazy<IExtendedApiExplorer> m_ApiExplorer;
         private Lazy<IExtendedDocumentationProvider> m_DocumentationProvider;
         private const string GROUP_TEMPLATE_NAME = "apiMethodGroup";
         private const string METHOD_TEMPLATE_NAME = "apiMethod";
 
-        public ApiDocumentationBuilder(HttpConfiguration httpConfiguration, string tocRoot = null)
+        public ApiDocumentationBuilder(HelpPageConfiguration helpPageConfiguration, string tocRoot = null)
         {
-            if (httpConfiguration == null) throw new ArgumentNullException("httpConfiguration");
-            m_HttpConfiguration = httpConfiguration;
+            if (helpPageConfiguration == null) throw new ArgumentNullException("helpPageConfiguration");
+            m_HelpPageConfiguration = helpPageConfiguration;
             m_TocRoot = tocRoot ?? string.Empty;
             initializeDependencies();
         }
-
+       
         private void initializeDependencies()
         {
             m_ApiExplorer = new Lazy<IExtendedApiExplorer>(() =>
                 {
-                    var apiExplorer = m_HttpConfiguration.Services.GetApiExplorer() as IExtendedApiExplorer;
+                    var apiExplorer = m_HelpPageConfiguration.HttpConfiguration.Services.GetApiExplorer() as IExtendedApiExplorer;
                     if (apiExplorer == null)
                     {
                         throw new ConfigurationErrorsException(string.Format("The type {0} requires {1} to be registered in http configuration.", typeof(ApiDocumentationBuilder).Name, typeof(IExtendedApiExplorer).Name));
@@ -41,7 +41,7 @@ namespace Inceptum.WebApi.Help.Builders
                 });
             m_DocumentationProvider = new Lazy<IExtendedDocumentationProvider>(() =>
                 {
-                    var docProvider = m_HttpConfiguration.Services.GetDocumentationProvider() as IExtendedDocumentationProvider;
+                    var docProvider = m_HelpPageConfiguration.HttpConfiguration.Services.GetDocumentationProvider() as IExtendedDocumentationProvider;
                     if (docProvider == null)
                     {
                         throw new ConfigurationErrorsException(string.Format("The type {0} requires {1} to be registered in http configuration.", typeof(ApiDocumentationBuilder).Name, typeof(IExtendedDocumentationProvider).Name));
@@ -88,7 +88,7 @@ namespace Inceptum.WebApi.Help.Builders
                 {
                     Title = api.DisplayName,
                     Template = METHOD_TEMPLATE_NAME,
-                    Data = builder.BuildDTO(api)
+                    Data = builder.BuildDTO(m_HelpPageConfiguration.SamplesBaseUri, api)
                 });
         }
 
@@ -158,7 +158,7 @@ namespace Inceptum.WebApi.Help.Builders
         /// </summary>
         public sealed class DtoBuilder
         {
-            public ApiDescriptionDto BuildDTO(ExtendedApiDescription apiDoc)
+            public ApiDescriptionDto BuildDTO(Uri baseUri, ExtendedApiDescription apiDoc)
             {
                 if (apiDoc == null) throw new ArgumentNullException("apiDoc");
 
@@ -168,7 +168,7 @@ namespace Inceptum.WebApi.Help.Builders
                     Controller = apiDoc.Controller,
                     HttpMethod = apiDoc.HttpMethod.Method,
                     RelativePath = apiDoc.RelativePath,
-                    FullPath = apiDoc.BaseAddress + apiDoc.RelativePath,
+                    FullPath = new Uri(baseUri, apiDoc.RelativePath).ToString(),
                     Documentation = apiDoc.Documentation,
                     UriParameters = apiDoc.UriParameters.Select(buildDTO).ToArray(),
                 };

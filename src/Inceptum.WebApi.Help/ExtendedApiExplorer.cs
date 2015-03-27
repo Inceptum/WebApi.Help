@@ -79,8 +79,7 @@ namespace Inceptum.WebApi.Help
             var apiDescriptionEx = new ExtendedApiDescription(apiDescription)
                 {
                     Controller = DocumentationProvider.GetName(apiDescription.ActionDescriptor.ControllerDescriptor) ?? apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName,
-                    DisplayName = DocumentationProvider.GetName(apiDescription.ActionDescriptor) ?? string.Format("{0} {1}", apiDescription.HttpMethod.Method, apiDescription.RelativePath),
-                    BaseAddress = m_HttpConfiguration.GetBaseAddress()
+                    DisplayName = DocumentationProvider.GetName(apiDescription.ActionDescriptor) ?? string.Format("{0} {1}", apiDescription.HttpMethod.Method, apiDescription.RelativePath)                    
                 };
 
             GenerateUriParameters(apiDescriptionEx);

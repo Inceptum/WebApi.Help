@@ -12,37 +12,36 @@ namespace Inceptum.WebApi.Help
     /// </summary>
     public sealed class HelpPageConfiguration
     {
-        private readonly HttpConfiguration m_HttpConfiguration;
         private IContentProvider m_CustomContentProvider;
         private IHelpProvider m_CustomHelpProvider;
         private readonly List<Tuple<IPdfTemplateProvider, int>> m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>();
 
-
-
         public HelpPageConfiguration(HttpConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
-            m_HttpConfiguration = configuration;
+            HttpConfiguration = configuration;
             UriPrefix = "/help";
+            SamplesBaseUri = HttpConfiguration.GetBaseAddress() ?? new Uri("http://api.example.com");
             createDefaultServices();
-        //    RegisterPdfTemplateProvider(new DefaultPdfTemplateProvider());
-
+            //    RegisterPdfTemplateProvider(new DefaultPdfTemplateProvider());
         }
-
-
 
         private void createDefaultServices()
         {
             DefaultContentProvider = new LocalizableContentProvider(new EmbeddedResourcesContentProvider());
             var helpProvider = new HelpProvider();
-            helpProvider.RegisterBuilder(new ApiDocumentationBuilder(m_HttpConfiguration));
+            helpProvider.RegisterBuilder(new ApiDocumentationBuilder(this));
             helpProvider.RegisterBuilder(new ErrorsDocumentationBuilder());
             m_DefaultHelpProvider = helpProvider;
-            m_DefaultApiExplorer = new ExtendedApiExplorer(m_HttpConfiguration);
+            m_DefaultApiExplorer = new ExtendedApiExplorer(HttpConfiguration);
+
         }
 
+        public HttpConfiguration HttpConfiguration { get; private set; }
+
         /// <summary>
-        /// Gets or sets an uri prefix to be used by help pages, e.g. /help or /api/help
+        /// Gets or sets an uri prefix to be used by help pages.
+        /// This must be in a form of relative URI, starting with '/' character, e.g. /help or /api/help.
         /// </summary>        
         public string UriPrefix
         {
@@ -59,8 +58,23 @@ namespace Inceptum.WebApi.Help
         }
         private string m_UriPrefix;
 
+        /// <summary>
+        /// Base URI to be used in request samples
+        /// </summary>
+        public Uri SamplesBaseUri
+        {
+            get { return m_SamplesBaseUri; }
+            set
+            {
+                if (value == null) throw new ArgumentNullException("value");
+                if (!value.IsAbsoluteUri) throw new ArgumentException(@"Value expected to be an absolute uri, e.g. http://api.example.com", "value");
+                m_SamplesBaseUri = value;
+            }
+        }
+        private Uri m_SamplesBaseUri;
+
         public IContentProvider DefaultContentProvider { get; private set; }
-        
+
         private HelpProvider m_DefaultHelpProvider;
         public IHelpProvider DefaultHelpProvider
         {
@@ -78,14 +92,14 @@ namespace Inceptum.WebApi.Help
         public HelpPageConfiguration WithApiExplorer(IExtendedApiExplorer apiExplorer)
         {
             if (apiExplorer == null) throw new ArgumentNullException("apiExplorer");
-            m_HttpConfiguration.Services.Replace(typeof(IApiExplorer), apiExplorer);
+            HttpConfiguration.Services.Replace(typeof(IApiExplorer), apiExplorer);
             return this;
         }
 
         public HelpPageConfiguration WithDocumentationProvider(IDocumentationProvider documentationProvider)
         {
             if (documentationProvider == null) throw new ArgumentNullException("documentationProvider");
-            m_HttpConfiguration.Services.Replace(typeof(IDocumentationProvider), documentationProvider);
+            HttpConfiguration.Services.Replace(typeof(IDocumentationProvider), documentationProvider);
             return this;
         }
 
@@ -128,14 +142,12 @@ namespace Inceptum.WebApi.Help
             return this;
         }
 
-
         private Tuple<IPdfTemplateProvider, int> findPdfTemplateProvider(Type actualType)
         {
             if (actualType == null) throw new ArgumentNullException("actualType");
 
             return m_PdfTemplateProviders.FirstOrDefault(x => x.Item1.GetType() == actualType);
         }
-
 
         public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder, int rank = 0)
         {
@@ -144,8 +156,6 @@ namespace Inceptum.WebApi.Help
             m_DefaultHelpProvider.RegisterBuilder(builder, rank);
             return this;
         }
-
-
 
         public HelpPageConfiguration UnregisterHelpBuilder<T>() where T : IHelpBuilder
         {
@@ -166,17 +176,17 @@ namespace Inceptum.WebApi.Help
         internal void Configure()
         {
             // Replace default ApiExplorer (if not already replaced)
-            if (m_HttpConfiguration.Services.GetApiExplorer().GetType() == typeof(ApiExplorer))
+            if (HttpConfiguration.Services.GetApiExplorer().GetType() == typeof(ApiExplorer))
             {
-                m_HttpConfiguration.Services.Replace(typeof(IApiExplorer), new ExtendedApiExplorer(m_HttpConfiguration));
+                HttpConfiguration.Services.Replace(typeof(IApiExplorer), new ExtendedApiExplorer(HttpConfiguration));
             }
 
             if (m_AutoDocumentedTypes != null && m_AutoDocumentedTypes.Length > 0)
             {
-                m_DefaultHelpProvider.RegisterBuilder(new TypesDocumentationBuilder(m_HttpConfiguration, m_AutoDocumentedTypes));
+                m_DefaultHelpProvider.RegisterBuilder(new TypesDocumentationBuilder(HttpConfiguration, m_AutoDocumentedTypes));
             }
 
-            m_HttpConfiguration.MessageHandlers.Insert(0,
+            HttpConfiguration.MessageHandlers.Insert(0,
                 new HelpPageHandler(this,
                     m_CustomHelpProvider ?? DefaultHelpProvider,
                     m_CustomContentProvider ?? DefaultContentProvider,
