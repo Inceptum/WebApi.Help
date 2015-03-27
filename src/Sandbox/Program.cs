@@ -49,7 +49,8 @@ namespace Sandbox
                     help.WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
                         .WithContentProvider(help.DefaultContentProvider)
                         .RegisterHelpBuilder(new DelegatingBuilder(addDynamicContent))
-                        .AutoDocumentedTypes(typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>));
+                        .RegisterHelpBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help."))
+                        .AutoDocumentedTypes(typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>));                    
                 }
             );
 

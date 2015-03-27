@@ -1,0 +1,16 @@
+<div class="api-method">    
+    <div class="w50pc fl">
+        <p data-bind="html: text" style="padding-right: 1em;"></p>
+    </div>
+    <div class="w50pc fr">
+        <!-- ko if: codeBlocks -->
+        <div data-bind="foreach: codeBlocks">
+            <blockquote>
+                <p data-bind="html: key"></p>
+            </blockquote>
+            <pre data-bind="code: { value: value, syntax: key }"></pre>
+        </div>
+        <!-- /ko -->
+    </div>
+    <div class="clear"></div>
+</div>
