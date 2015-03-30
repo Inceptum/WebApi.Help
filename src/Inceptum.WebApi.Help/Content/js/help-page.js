@@ -47,13 +47,12 @@
                     return true;
                 });
             },
-            selectItemInTocTree = function ($item) {
-                console.log('Selecting:' + $item.attr('id'));
+            selectItemInTocTree = function ($item) {                
                 // Switch selected navigation item
                 $selectedTocItem.removeClass('selected');
                 $selectedTocItem = $item.addClass('selected');
 
-                // Collapse all non-top level navigarion tree nodes except ones that are parents of selected branch
+                // Collapse all non-top level navigation tree nodes except ones that are parents of selected branch
                 $('.toc-list.nested').not($selectedTocItem.parents('.toc-list.nested')).addClass('hidden');
 
                 // Expand nodes from selected branch up to tree's root (required if navigation was done via changing window location, not by clicking on items)
@@ -124,7 +123,7 @@
             render: render,
             changeLanguage: changeLanguage,
             onRendered: function () {
-                // Wait until all items are rendered. There are two templates (header & content) per each item
+                // Wait until all items are rendered. There are two templates (header & content) per each item.
                 if (++renderedTemplatesCount >= 2 * items().length) {
                     window.setTimeout(onUriHashChanged, 50);
                     startScrollTracking();

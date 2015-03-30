@@ -13,7 +13,7 @@ namespace Inceptum.WebApi.Help
     {
         public HelpPageModel()
         {
-            Items = new List<HelpItem>();            
+            Items = new List<HelpItem>();
         }
 
         public List<HelpItem> Items { get; private set; }
@@ -29,10 +29,9 @@ namespace Inceptum.WebApi.Help
 
         public HelpItem(string tableOfContentPath)
         {
-            if(string.IsNullOrWhiteSpace(tableOfContentPath))
+            if (string.IsNullOrWhiteSpace(tableOfContentPath))
                 throw new ArgumentException(@"tableOfContentPath should be not whitespace string", "tableOfContentPath");
             TableOfContentPath = tableOfContentPath.Split('/').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-            //TableOfContentId = TableOfContentPath.Last();
             TableOfContentId = string.Join("-", TableOfContentPath.Select(x => x.ToSlug()));
         }
 
@@ -51,26 +50,29 @@ namespace Inceptum.WebApi.Help
         }
 
         /// <summary>
-        /// Item's link path in table of content tree, e.g. /api/help/my-item
+        /// Array of path segments which represents a position of given help item in the navigation tree
         /// </summary>
         [JsonIgnore]
         public string[] TableOfContentPath { get; set; }
 
         /// <summary>
-        /// Data, associated with the help item.
+        /// Data, associated with the help item
         /// </summary>
         public object Data { get; set; }
 
         /// <summary>
-        /// A template, used to render the data.
+        /// A template, used to render the data
         /// </summary>
         public string Template { get; set; }
 
+        /// <summary>
+        /// Depth of the help item in the navigation tree
+        /// </summary>
         public int Level { get; internal set; }
     }
 
     /// <summary>
-    /// Represents an item in the table of contents on the help page.
+    /// Represents an item in the table of contents on the help page
     /// </summary>
     public class TableOfContentItem
     {
@@ -79,8 +81,19 @@ namespace Inceptum.WebApi.Help
             Children = new List<TableOfContentItem>();
         }
 
+        /// <summary>
+        /// A text to be displayed in navigation tree
+        /// </summary>
         public string Text { get; set; }
+
+        /// <summary>
+        /// An id of the referenced help item 
+        /// </summary>
         public string ReferenceId { get; set; }
+
+        /// <summary>
+        /// A list of child nodes
+        /// </summary>
         public List<TableOfContentItem> Children { get; set; }
     }
 }
