@@ -16,7 +16,7 @@ namespace Inceptum.WebApi.Help.Builders
         private const string REFERENCE_ID = "API-Errors";
         private const string TEMPLATE_NAME = "errorCodes";
 
-        internal ErrorsDocumentationBuilder()
+        public ErrorsDocumentationBuilder()
             : this(new ResourceManager(typeof(Strings)))
         {
         }
