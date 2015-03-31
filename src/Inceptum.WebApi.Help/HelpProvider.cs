@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using Newtonsoft.Json.Linq;
 using Inceptum.WebApi.Help.Builders;
 
 namespace Inceptum.WebApi.Help
@@ -13,19 +12,28 @@ namespace Inceptum.WebApi.Help
     /// </summary>
     public class HelpProvider : IHelpProvider
     {
-        private readonly List<Tuple<IHelpBuilder, int>> m_Builders = new List<Tuple<IHelpBuilder, int>>();
+        private readonly List<IHelpBuilder> m_Builders = new List<IHelpBuilder>();
 
         public HelpPageModel GetHelp()
         {
-            // Sort builders by rank: higher ranked builders will produce results later and therefore can override low-ranked results.
-            var helpItems = m_Builders.OrderBy(x => x.Item2).SelectMany(x => x.Item1.BuildHelp());
-           
-            var model = buildHelpPage(helpItems);
+            var helpItems = m_Builders.SelectMany(x => x.BuildHelp());
+
+            var model = BuildHelpPage(SortItems(helpItems));
 
             return model;
         }
 
-        private static HelpPageModel buildHelpPage(IEnumerable<HelpItem> helpItems)
+        /// <summary>
+        /// This provides an appotunity to sort help items before creating a navigation tree.
+        /// Sorting means that items at the same level of the navigation tree will be placed in order, defined herein.
+        /// </summary>        
+        protected virtual IEnumerable<HelpItem> SortItems(IEnumerable<HelpItem> helpItems)
+        {
+            if (helpItems == null) throw new ArgumentNullException("helpItems");
+            return helpItems;
+        }
+
+        protected virtual HelpPageModel BuildHelpPage(IEnumerable<HelpItem> helpItems)
         {
             if (helpItems == null) throw new ArgumentNullException("helpItems");
 
@@ -37,7 +45,6 @@ namespace Inceptum.WebApi.Help
             {
                 helpTree.AddByPath(item.TableOfContentPath, item);
             }
-            
 
             // Build table of content
             model.TableOfContent = processTree(model, helpTree);
@@ -95,9 +102,7 @@ namespace Inceptum.WebApi.Help
             }
         }
 
-
-
-        public void RegisterBuilder(IHelpBuilder builder, int rank = 0)
+        public void RegisterBuilder(IHelpBuilder builder)
         {
             if (builder == null) throw new ArgumentNullException("builder");
 
@@ -106,7 +111,7 @@ namespace Inceptum.WebApi.Help
                 throw new InvalidOperationException(string.Format("Builder of type {0} is already registered.", builder.GetType()));
             }
 
-            m_Builders.Add(Tuple.Create(builder, rank));
+            m_Builders.Add(builder);
         }
 
         public void UnregisterBuilder(Type concreteType)
@@ -124,14 +129,14 @@ namespace Inceptum.WebApi.Help
         {
             var tuple = findBuilder(typeof(T));
 
-            return tuple != null ? (T)tuple.Item1 : default(T);
+            return tuple != null ? (T)tuple : default(T);
         }
 
-        private Tuple<IHelpBuilder, int> findBuilder(Type actualType)
+        private IHelpBuilder findBuilder(Type actualType)
         {
             if (actualType == null) throw new ArgumentNullException("actualType");
 
-            return m_Builders.FirstOrDefault(x => x.Item1.GetType() == actualType);
+            return m_Builders.FirstOrDefault(x => x.GetType() == actualType);
         }
     }
 

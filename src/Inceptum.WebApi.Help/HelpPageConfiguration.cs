@@ -149,12 +149,18 @@ namespace Inceptum.WebApi.Help
             return m_PdfTemplateProviders.FirstOrDefault(x => x.Item1.GetType() == actualType);
         }
 
-        public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder, int rank = 0)
+        public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder)
         {
             if (builder == null) throw new ArgumentNullException("builder");
             m_DefaultHelpProvider.UnregisterBuilder(builder.GetType());
-            m_DefaultHelpProvider.RegisterBuilder(builder, rank);
+            m_DefaultHelpProvider.RegisterBuilder(builder);
             return this;
+        }
+
+        [Obsolete("This method is obsolete. To set an order of help items override SortItems in HelpProvider class")]
+        public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder, int rank)
+        {
+            return RegisterHelpBuilder(builder);
         }
 
         public HelpPageConfiguration UnregisterHelpBuilder<T>() where T : IHelpBuilder
