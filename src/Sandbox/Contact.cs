@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Sandbox
 {
     /// <summary>
@@ -31,5 +33,24 @@ namespace Sandbox
         /// Дополнительные данные, ассоциированные с контактом
         /// </summary>
         public ExtraData Extra = new ExtraData();
+
+        /// <summary>
+        /// A collection of links associated with the contanct
+        /// </summary>
+        /// <summary lang="ru">
+        /// Коллекция ссылок, ассоциированный с контактом
+        /// </summary>
+        public LinksCollection Links = new LinksCollection();
+    }
+
+    /// <summary>
+    /// A collection of links
+    /// </summary>
+    /// <summary lang="ru">
+    /// Коллекция ссылок
+    /// </summary>
+    public class LinksCollection : Dictionary<string, string>
+    {
+
     }
 }

@@ -20,7 +20,7 @@ namespace Sandbox
         {
             Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
             var server = new HttpSelfHostServer(createApiConfiguration("http://localhost:7777"));
-            server.OpenAsync().Wait();
+            server.OpenAsync().Wait();            
             Console.ReadLine();
             server.CloseAsync().Wait();
         }

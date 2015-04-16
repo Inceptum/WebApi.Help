@@ -384,13 +384,15 @@ namespace Inceptum.WebApi.Help.ModelDescriptions
             ModelDescription keyModelDescription = GetOrCreateModelDescription(keyType);
             ModelDescription valueModelDescription = GetOrCreateModelDescription(valueType);
 
+            var defDocumentation = createDefaultDocumentation(modelType);
+
             return new DictionaryModelDescription
             {
-                Name = ModelNameHelper.GetModelName(modelType),                
+                Name = ModelNameHelper.GetModelName(modelType),
                 ModelType = modelType,
                 KeyModelDescription = keyModelDescription,
                 ValueModelDescription = valueModelDescription,
-                Documentation = string.Format(Strings.DictionaryDocumentationTemplate, valueModelDescription.Name, keyModelDescription.Name)
+                Documentation = !string.IsNullOrWhiteSpace(defDocumentation) ? defDocumentation : string.Format(Strings.DictionaryDocumentationTemplate, valueModelDescription.Name, keyModelDescription.Name)
             };
         }
 
