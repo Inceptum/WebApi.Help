@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Inceptum.WebApi.Help.ModelDescriptions;
 
 namespace Sandbox
 {
@@ -8,6 +9,7 @@ namespace Sandbox
     /// <summary lang="ru">
     /// Информация о контакте персоны
     /// </summary>
+    [ModelName("MyContract")]
     public class Contact
     {
         /// <summary>

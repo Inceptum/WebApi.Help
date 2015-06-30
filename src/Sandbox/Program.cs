@@ -19,9 +19,12 @@ namespace Sandbox
         internal static void Main()
         {
             Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
-            var server = new HttpSelfHostServer(createApiConfiguration("http://localhost:7777"));
-            server.OpenAsync().Wait();            
-            Console.ReadLine();
+            const string baseUri = "http://localhost:7777";
+            var server = new HttpSelfHostServer(createApiConfiguration(baseUri));
+            Console.WriteLine("Starting host at {0}...", baseUri);
+            server.OpenAsync().Wait();
+            Console.WriteLine("Started. Press ENTER to stop");
+            Console.ReadLine();            
             server.CloseAsync().Wait();
         }
 
