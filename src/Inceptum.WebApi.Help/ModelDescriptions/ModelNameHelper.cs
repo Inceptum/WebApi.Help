@@ -7,13 +7,12 @@ namespace Inceptum.WebApi.Help.ModelDescriptions
 {
     internal static class ModelNameHelper
     {
-        // Modify this to provide custom model name mapping.
         public static string GetModelName(Type type)
         {
-            var modelNameAttribute = type.GetCustomAttribute<ModelNameAttribute>();
-            if (modelNameAttribute != null && !String.IsNullOrEmpty(modelNameAttribute.Name))
+            var displayNameAttribute = type.GetCustomAttribute<System.ComponentModel.DisplayNameAttribute>();
+            if (displayNameAttribute != null && !String.IsNullOrEmpty(displayNameAttribute.DisplayName))
             {
-                return modelNameAttribute.Name;
+                return displayNameAttribute.DisplayName;
             }
 
             string modelName = type.Name;
@@ -26,9 +25,8 @@ namespace Inceptum.WebApi.Help.ModelDescriptions
 
                 // Trim the generic parameter counts from the name
                 genericTypeName = genericTypeName.Substring(0, genericTypeName.IndexOf('`'));
-                string[] argumentTypeNames = genericArguments.Select(t => GetModelName(t)).ToArray();
-                modelName = String.Format(CultureInfo.InvariantCulture, "{0}Of{1}", genericTypeName,
-                    String.Join("And", argumentTypeNames));
+                string[] argumentTypeNames = genericArguments.Select(GetModelName).ToArray();
+                modelName = String.Format(CultureInfo.InvariantCulture, "{0}Of{1}", genericTypeName, string.Join("And", argumentTypeNames));
             }
 
             return modelName;
