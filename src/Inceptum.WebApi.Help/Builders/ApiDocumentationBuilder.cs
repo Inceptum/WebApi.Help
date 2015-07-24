@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Web.Http;
 using Inceptum.WebApi.Help.ModelDescriptions;
 
 namespace Inceptum.WebApi.Help.Builders
@@ -13,41 +11,17 @@ namespace Inceptum.WebApi.Help.Builders
     /// </summary>
     public class ApiDocumentationBuilder : IHelpBuilder
     {
-        private readonly HelpPageConfiguration m_HelpPageConfiguration;
+        private readonly IServiceLocator m_ServiceLocator;
+        private readonly Uri m_SamplesBaseUri;
         private readonly string m_TocRoot;
-        private Lazy<IExtendedApiExplorer> m_ApiExplorer;
-        private Lazy<IExtendedDocumentationProvider> m_DocumentationProvider;
         private const string GROUP_TEMPLATE_NAME = "apiMethodGroup";
         private const string METHOD_TEMPLATE_NAME = "apiMethod";
 
-        public ApiDocumentationBuilder(HelpPageConfiguration helpPageConfiguration, string tocRoot = null)
+        public ApiDocumentationBuilder(HelpPageConfiguration configurationConfig, string tocRoot = null)
         {
-            if (helpPageConfiguration == null) throw new ArgumentNullException("helpPageConfiguration");
-            m_HelpPageConfiguration = helpPageConfiguration;
+            m_ServiceLocator = configurationConfig.ServiceLocator;
+            m_SamplesBaseUri = configurationConfig.SamplesUriInternal;
             m_TocRoot = tocRoot ?? string.Empty;
-            initializeDependencies();
-        }
-       
-        private void initializeDependencies()
-        {
-            m_ApiExplorer = new Lazy<IExtendedApiExplorer>(() =>
-                {
-                    var apiExplorer = m_HelpPageConfiguration.HttpConfiguration.Services.GetApiExplorer() as IExtendedApiExplorer;
-                    if (apiExplorer == null)
-                    {
-                        throw new ConfigurationErrorsException(string.Format("The type {0} requires {1} to be registered in http configuration.", typeof(ApiDocumentationBuilder).Name, typeof(IExtendedApiExplorer).Name));
-                    }
-                    return apiExplorer;
-                });
-            m_DocumentationProvider = new Lazy<IExtendedDocumentationProvider>(() =>
-                {
-                    var docProvider = m_HelpPageConfiguration.HttpConfiguration.Services.GetDocumentationProvider() as IExtendedDocumentationProvider;
-                    if (docProvider == null)
-                    {
-                        throw new ConfigurationErrorsException(string.Format("The type {0} requires {1} to be registered in http configuration.", typeof(ApiDocumentationBuilder).Name, typeof(IExtendedDocumentationProvider).Name));
-                    }
-                    return docProvider;
-                });
         }
 
         public IEnumerable<HelpItem> BuildHelp()
@@ -55,27 +29,17 @@ namespace Inceptum.WebApi.Help.Builders
             return CreateMethodGroupsHelp().Union(CreateMethodsHelp());
         }
 
-        protected IExtendedApiExplorer ApiExplorer
-        {
-            get { return m_ApiExplorer.Value; }
-        }
-
-        protected IExtendedDocumentationProvider DocumentationProvider
-        {
-            get { return m_DocumentationProvider.Value; }
-        }
-
         protected virtual IEnumerable<HelpItem> CreateMethodGroupsHelp()
         {
-            return from @group in ApiExplorer.ExtendedApiDescriptions.GroupBy(x => x.Controller)
+            return from @group in m_ServiceLocator.Get<IExtendedApiExplorer>().ExtendedApiDescriptions.GroupBy(x => x.Controller)
                    let controllerDescriptor = @group.First().ActionDescriptor.ControllerDescriptor
                    select new HelpItem(string.Format("{0}/{1}", m_TocRoot, controllerDescriptor.ControllerName))
                        {
-                           Title = DocumentationProvider.GetName(controllerDescriptor),
+                           Title = m_ServiceLocator.Get<IExtendedDocumentationProvider>().GetName(controllerDescriptor),
                            Data = new
                                {
                                    name = @group.Key,
-                                   documentation = DocumentationProvider.GetDocumentation(controllerDescriptor)
+                                   documentation = m_ServiceLocator.Get<IExtendedDocumentationProvider>().GetDocumentation(controllerDescriptor)
                                },
                            Template = GROUP_TEMPLATE_NAME
                        };
@@ -84,11 +48,11 @@ namespace Inceptum.WebApi.Help.Builders
         protected virtual IEnumerable<HelpItem> CreateMethodsHelp()
         {
             var builder = new DtoBuilder();
-            return ApiExplorer.ExtendedApiDescriptions.Select(api => new HelpItem(string.Format("{0}/{1}/{2}", m_TocRoot, api.ActionDescriptor.ControllerDescriptor.ControllerName, api.ActionDescriptor.ActionName))
+            return m_ServiceLocator.Get<IExtendedApiExplorer>().ExtendedApiDescriptions.Select(api => new HelpItem(string.Format("{0}/{1}/{2}", m_TocRoot, api.ActionDescriptor.ControllerDescriptor.ControllerName, api.ActionDescriptor.ActionName))
                 {
                     Title = api.DisplayName,
                     Template = METHOD_TEMPLATE_NAME,
-                    Data = builder.BuildDTO(m_HelpPageConfiguration.SamplesBaseUri, api)
+                    Data = builder.BuildDTO(m_SamplesBaseUri, api)
                 });
         }
 

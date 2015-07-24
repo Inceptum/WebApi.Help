@@ -1,119 +1,128 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.Http.Routing;
 using Inceptum.WebApi.Help.Builders;
 
 namespace Inceptum.WebApi.Help
 {
     /// <summary>
-    /// Help page configuration
+    /// This class provides fluent interface for help page configuration
     /// </summary>
     public sealed class HelpPageConfiguration
     {
-        private IContentProvider m_CustomContentProvider;
-        private IHelpProvider m_CustomHelpProvider;
+        private readonly HttpConfiguration m_HttpConfiguration;
+        private string m_RouteTemplate = HelpPageHandler.DEFAULT_HELP_PAGE_ROUTE_TEMPLATE;
+        private Uri m_SamplesBaseUri = new Uri(string.Format("http://{0}", Environment.MachineName ?? "localhost"));
+        private Type[] m_AutoDocumentedTypes = new Type[0];
+        private string m_AutoDocumentedTypesTocPath;
+        private Action<HelpProvider> m_HelpProviderSetup;
+        private readonly ServiceLocatorImpl m_ServiceLocator;
         private readonly List<Tuple<IPdfTemplateProvider, int>> m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>();
 
-        public HelpPageConfiguration(HttpConfiguration configuration)
+        public HelpPageConfiguration(HttpConfiguration httpConfiguration)
         {
-            if (configuration == null) throw new ArgumentNullException("configuration");
-            HttpConfiguration = configuration;
-            UriPrefix = "/help";
-            SamplesBaseUri = HttpConfiguration.GetBaseAddress() ?? new Uri("http://api.example.com");
-            createDefaultServices();
-            //    RegisterPdfTemplateProvider(new DefaultPdfTemplateProvider());
+            if (httpConfiguration == null) throw new ArgumentNullException("httpConfiguration");
+            m_HttpConfiguration = httpConfiguration;
+            var srvLocator = new ServiceLocatorImpl();
+            srvLocator.Register<IExtendedApiExplorer>(() => new ExtendedApiExplorer(m_HttpConfiguration));
+            srvLocator.Register<IExtendedDocumentationProvider>(() => new XmlDocumentationProvider());
+            srvLocator.Register<IContentProvider>(() => new LocalizableContentProvider(new EmbeddedResourcesContentProvider()));
+            srvLocator.Register(createDefaultHelpProvider);
+            m_ServiceLocator = srvLocator;
         }
-
-        private void createDefaultServices()
-        {
-            DefaultContentProvider = new LocalizableContentProvider(new EmbeddedResourcesContentProvider());
-            var helpProvider = new HelpProvider();
-            helpProvider.RegisterBuilder(new ApiDocumentationBuilder(this));
-            helpProvider.RegisterBuilder(new ErrorsDocumentationBuilder());
-            m_DefaultHelpProvider = helpProvider;
-            m_DefaultApiExplorer = new ExtendedApiExplorer(HttpConfiguration);
-
-        }
-
-        public HttpConfiguration HttpConfiguration { get; private set; }
 
         /// <summary>
-        /// Gets or sets an uri prefix to be used by help pages.
-        /// This must be in a form of relative URI, starting with '/' character, e.g. /help or /api/help.
-        /// </summary>        
-        public string UriPrefix
-        {
-            get { return m_UriPrefix; }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(value);
-                if (!value.StartsWith("/")) throw new ArgumentException(string.Format("The '{0}' is not valid value for URI", value));
-
-                var uri = new Uri(value, UriKind.Relative);
-
-                m_UriPrefix = uri.ToString().TrimEnd('/', '\\');
-            }
-        }
-        private string m_UriPrefix;
-
-        /// <summary>
-        /// Base URI to be used in request samples
+        /// Gets and instance of the service locator
+        /// TODO[tv]: Not sure we gonna need it public
         /// </summary>
-        public Uri SamplesBaseUri
+        public IServiceLocator ServiceLocator
+        {
+            get { return m_ServiceLocator; }
+        }
+
+        internal Uri SamplesUriInternal
         {
             get { return m_SamplesBaseUri; }
-            set
-            {
-                if (value == null) throw new ArgumentNullException("value");
-                if (!value.IsAbsoluteUri) throw new ArgumentException(@"Value expected to be an absolute uri, e.g. http://api.example.com", "value");
-                m_SamplesBaseUri = value;
-            }
         }
-        private Uri m_SamplesBaseUri;
 
-        public IContentProvider DefaultContentProvider { get; private set; }
-
-        private HelpProvider m_DefaultHelpProvider;
-        public IHelpProvider DefaultHelpProvider
+        /// <summary>
+        /// Configures a route to listen for help page requests.
+        /// The route must have {*resource} part at it's end.
+        /// Valid route example are api/help/{*resource}, apihelp/{*resource}, help/{*resource}.
+        /// </summary>
+        public HelpPageConfiguration Route(string routeTemplate)
         {
-            get { return m_DefaultHelpProvider; }
+            if (string.IsNullOrWhiteSpace(routeTemplate)) throw new ArgumentNullException(routeTemplate);
+            if (!routeTemplate.EndsWith("{*resource}")) throw new ArgumentException("Template must contain {*resource} part at the end of it", "routeTemplate");
+
+            m_RouteTemplate = routeTemplate.TrimEnd('/', '\\');
+
+            return this;
         }
 
-        private ExtendedApiExplorer m_DefaultApiExplorer;
-        public IExtendedApiExplorer DefaultApiExplorer
+        /// <summary>
+        /// Configures an uri to be used as base address for sample routes generation 
+        /// </summary> 
+        public HelpPageConfiguration SamplesUri(Uri uri)
         {
-            get { return m_DefaultApiExplorer; }
+            if (uri == null) throw new ArgumentNullException("uri");
+            if (!uri.IsAbsoluteUri)
+                throw new ArgumentException(@"Value expected to be an absolute uri, e.g. http://api.example.com", "uri");
+            m_SamplesBaseUri = uri;
+            return this;
         }
-
-        #region Fluent configuration
 
         public HelpPageConfiguration WithApiExplorer(IExtendedApiExplorer apiExplorer)
         {
             if (apiExplorer == null) throw new ArgumentNullException("apiExplorer");
-            HttpConfiguration.Services.Replace(typeof(IApiExplorer), apiExplorer);
+            m_ServiceLocator.Register(() => apiExplorer);
             return this;
         }
 
-        public HelpPageConfiguration WithDocumentationProvider(IDocumentationProvider documentationProvider)
+        public HelpPageConfiguration WithDocumentationProvider(IExtendedDocumentationProvider documentationProvider)
         {
             if (documentationProvider == null) throw new ArgumentNullException("documentationProvider");
-            HttpConfiguration.Services.Replace(typeof(IDocumentationProvider), documentationProvider);
+            m_ServiceLocator.Register(() => documentationProvider);
+            return this;
+        }
+
+        public HelpPageConfiguration WithXmlDocumentationProvider(string docsFolder)
+        {
+            if (string.IsNullOrWhiteSpace(docsFolder)) throw new ArgumentNullException("documentationFolder");
+            m_ServiceLocator.Register(() => new XmlDocumentationProvider(docsFolder));
             return this;
         }
 
         public HelpPageConfiguration WithContentProvider(IContentProvider contentProvider)
         {
             if (contentProvider == null) throw new ArgumentNullException("contentProvider");
-            m_CustomContentProvider = contentProvider;
+            m_ServiceLocator.Register(() => contentProvider);
             return this;
         }
 
         public HelpPageConfiguration WithHelpProvider(IHelpProvider helpProvider)
         {
             if (helpProvider == null) throw new ArgumentNullException("helpProvider");
-            m_CustomHelpProvider = helpProvider;
+            m_ServiceLocator.Register(() => helpProvider);
+            return this;
+        }
+
+        public HelpPageConfiguration ConfigureHelpProvider(Action<HelpProvider> setup)
+        {
+            if (setup == null) throw new ArgumentNullException("setup");
+            m_HelpProviderSetup = setup;
+            return this;
+        }
+
+        public HelpPageConfiguration AutoDocumentedTypes(IEnumerable<Type> types, string tocPath = null)
+        {
+            if (types == null) throw new ArgumentNullException("types");
+            m_AutoDocumentedTypes = types.ToArray();
+            m_AutoDocumentedTypesTocPath = tocPath;
             return this;
         }
 
@@ -149,54 +158,63 @@ namespace Inceptum.WebApi.Help
             return m_PdfTemplateProviders.FirstOrDefault(x => x.Item1.GetType() == actualType);
         }
 
-        public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder)
+        internal void WireUp()
         {
-            if (builder == null) throw new ArgumentNullException("builder");
-            m_DefaultHelpProvider.UnregisterBuilder(builder.GetType());
-            m_DefaultHelpProvider.RegisterBuilder(builder);
-            return this;
+            m_HttpConfiguration.Services.Replace(typeof(IApiExplorer), m_ServiceLocator.Get<IExtendedApiExplorer>());
+            m_HttpConfiguration.Services.Replace(typeof(IDocumentationProvider), m_ServiceLocator.Get<IExtendedDocumentationProvider>());
+
+            var helpRouteHandler = new HelpPageHandler(m_ServiceLocator.Get<IHelpProvider>(), m_ServiceLocator.Get<IContentProvider>(), m_PdfTemplateProviders);
+            m_HttpConfiguration.Routes.Insert(0, HelpPageHandler.HELP_PAGE_ROUTE_NAME,
+                new HttpRoute(m_RouteTemplate,
+                    null, // defaults
+                    new HttpRouteValueDictionary(new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) }),
+                    null, // data tokens
+                    helpRouteHandler));
         }
 
-        [Obsolete("This method is obsolete. To set an order of help items override SortItems in HelpProvider class")]
-        public HelpPageConfiguration RegisterHelpBuilder(IHelpBuilder builder, int rank)
+        private IHelpProvider createDefaultHelpProvider()
         {
-            return RegisterHelpBuilder(builder);
-        }
-
-        public HelpPageConfiguration UnregisterHelpBuilder<T>() where T : IHelpBuilder
-        {
-            m_DefaultHelpProvider.UnregisterBuilder(typeof(T));
-            return this;
-        }
-
-        Type[] m_AutoDocumentedTypes;
-        public HelpPageConfiguration AutoDocumentedTypes(params Type[] types)
-        {
-            if (types == null) throw new ArgumentNullException("types");
-            m_AutoDocumentedTypes = types;
-            return this;
-        }
-
-        #endregion
-
-        internal void Configure()
-        {
-            // Replace default ApiExplorer (if not already replaced)
-            if (HttpConfiguration.Services.GetApiExplorer().GetType() == typeof(ApiExplorer))
+            var helpProvider = new HelpProvider();
+            helpProvider.RegisterBuilder(new ApiDocumentationBuilder(this));
+            helpProvider.RegisterBuilder(new ErrorsDocumentationBuilder());
+            if (m_HelpProviderSetup != null)
             {
-                HttpConfiguration.Services.Replace(typeof(IApiExplorer), new ExtendedApiExplorer(HttpConfiguration));
+                m_HelpProviderSetup(helpProvider);
             }
-
-            if (m_AutoDocumentedTypes != null && m_AutoDocumentedTypes.Length > 0)
+            if (m_AutoDocumentedTypes.Length != 0)
             {
-                m_DefaultHelpProvider.RegisterBuilder(new TypesDocumentationBuilder(HttpConfiguration, m_AutoDocumentedTypes));
+                helpProvider.RegisterBuilder(new TypesDocumentationBuilder(m_HttpConfiguration.GetModelDescriptionGenerator(), m_AutoDocumentedTypes, m_AutoDocumentedTypesTocPath ?? TypesDocumentationBuilder.DEFAULT_TOC_PATH));
             }
+            return helpProvider;
+        }
+    }
 
-            HttpConfiguration.MessageHandlers.Insert(0,
-                new HelpPageHandler(this,
-                    m_CustomHelpProvider ?? DefaultHelpProvider,
-                    m_CustomContentProvider ?? DefaultContentProvider,
-                    m_PdfTemplateProviders));
+    /// <summary>
+    /// This class is used by help page infrastructure to resolve service dependencies 
+    /// </summary>
+    public interface IServiceLocator
+    {
+        T Get<T>() where T : class;
+    }
+
+    internal sealed class ServiceLocatorImpl : IServiceLocator
+    {
+        readonly Dictionary<Type, Func<object>> m_ObjectFactories = new Dictionary<Type, Func<object>>();
+
+        public void Register<T>(Func<T> creator) where T : class
+        {
+            if (creator == null) throw new ArgumentNullException("creator");
+            m_ObjectFactories[typeof(T)] = creator;
+        }
+
+        public T Get<T>() where T : class
+        {
+            Func<object> factory;
+            if (m_ObjectFactories.TryGetValue(typeof(T), out factory))
+            {
+                return (T)factory();
+            }
+            throw new InvalidOperationException(string.Format("Uknown service '{0}'", typeof(T)));
         }
     }
 }

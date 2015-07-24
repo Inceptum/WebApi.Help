@@ -8,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.Http.SelfHost;
 using Inceptum.WebApi.Help.ModelDescriptions;
 using Inceptum.WebApi.Help.SampleGeneration;
 
@@ -27,14 +26,14 @@ namespace Inceptum.WebApi.Help
 
             configuration.EnsureInitialized();
 
-            var helpPageConfiguration = new HelpPageConfiguration(configuration);
+            var fluentCfg = new HelpPageConfiguration(configuration);
 
             if (setup != null)
             {
-                setup(helpPageConfiguration);
+                setup(fluentCfg);
             }
 
-            helpPageConfiguration.Configure();
+            fluentCfg.WireUp();
 
             return configuration;
         }
@@ -182,12 +181,6 @@ namespace Inceptum.WebApi.Help
         public static void SetActualResponseType(this HttpConfiguration config, Type type, string controllerName, string actionName, params string[] parameterNames)
         {
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Response, controllerName, actionName, parameterNames), type);
-        }
-
-        internal static Uri GetBaseAddress(this HttpConfiguration config)
-        {
-            var sfConfig = config as HttpSelfHostConfiguration;
-            return sfConfig != null ? sfConfig.BaseAddress : null;
         }
 
         internal static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)

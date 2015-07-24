@@ -13,19 +13,25 @@ namespace Inceptum.WebApi.Help.Builders
     {
         private readonly ResourceManager m_ResourceManager;
         private readonly string m_TocRoot;
-        private const string REFERENCE_ID = "API-Errors";
+        private const string DEFAULT_TOC_PATH = "APIErrors";
         private const string TEMPLATE_NAME = "errorCodes";
 
         public ErrorsDocumentationBuilder()
-            : this(new ResourceManager(typeof(Strings)))
+            : this(DEFAULT_TOC_PATH)
         {
         }
 
-        public ErrorsDocumentationBuilder(ResourceManager resourceManager, string tocRoot = null)
+        public ErrorsDocumentationBuilder(string tocPath)
+            : this(new ResourceManager(typeof(Strings)), tocPath)
+        {
+        }
+
+        public ErrorsDocumentationBuilder(ResourceManager resourceManager, string tocPath = DEFAULT_TOC_PATH)
         {
             if (resourceManager == null) throw new ArgumentNullException("resourceManager");
+            if (string.IsNullOrWhiteSpace(tocPath)) throw new ArgumentNullException("tocPath");
             m_ResourceManager = resourceManager;
-            m_TocRoot = tocRoot ?? string.Empty;
+            m_TocRoot = (tocPath ?? string.Empty).Trim();
         }
 
         public IEnumerable<HelpItem> BuildHelp()
@@ -35,7 +41,7 @@ namespace Inceptum.WebApi.Help.Builders
 
         protected virtual IEnumerable<HelpItem> CreateHelpItems()
         {
-            yield return new HelpItem(string.Format("{0}/{1}", m_TocRoot, REFERENCE_ID))
+            yield return new HelpItem(m_TocRoot)
                 {
                     Title = Strings.ErrorCodes_Title,
                     Template = TEMPLATE_NAME,

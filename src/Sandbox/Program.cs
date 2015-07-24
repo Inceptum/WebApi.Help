@@ -24,7 +24,7 @@ namespace Sandbox
             Console.WriteLine("Starting host at {0}...", baseUri);
             server.OpenAsync().Wait();
             Console.WriteLine("Started. Press ENTER to stop");
-            Console.ReadLine();            
+            Console.ReadLine();
             server.CloseAsync().Wait();
         }
 
@@ -45,17 +45,16 @@ namespace Sandbox
             config.MapHttpAttributeRoutes();
 
             config.UseHelpPage(
-                help =>
-                {
-                    help.UriPrefix = "/api/help";
-                    help.SamplesBaseUri = new Uri("http://api.mydomain.org:9999");
-                    help.WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
-                        .WithContentProvider(help.DefaultContentProvider)
-                        .RegisterHelpBuilder(new DelegatingBuilder(addDynamicContent))
-                        .RegisterHelpBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help."))
-                        .AutoDocumentedTypes(typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>));                    
-                }
-            );
+                help => help.Route("api/help/{*resource}")
+                            .SamplesUri(new Uri("http://myapi.mycompany.com:8080"))
+                            .WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
+                            .ConfigureHelpProvider(hp =>
+                                    hp.ClearBuilders()
+                                        .RegisterBuilder(new ErrorsDocumentationBuilder("API/Errors"))
+                                        .RegisterBuilder(new ApiDocumentationBuilder(help, "API"))
+                                        .RegisterBuilder(new DelegatingBuilder(addDynamicContent))
+                                        .RegisterBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help.")))
+                            .AutoDocumentedTypes(new[] { typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>) }, "API/DataTypes"));
 
             // Global sample data configuration: whenever the specified type is requested (doesn't metter if it's a top level type, or a part of complex model), the provided data will be used 
             config.SetSampleObjects(new Dictionary<Type, object>()
@@ -66,7 +65,7 @@ namespace Sandbox
                 });
 
             // Per-request samples configuration. Note the value here is expected be a string.
-            config.SetSampleResponse(JObject.FromObject(new 
+            config.SetSampleResponse(JObject.FromObject(new
                 {
                     name = "Just created user",
                     age = 1

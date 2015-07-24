@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
 using Inceptum.WebApi.Help.Builders;
 
 namespace Inceptum.WebApi.Help
@@ -24,7 +22,7 @@ namespace Inceptum.WebApi.Help
         }
 
         /// <summary>
-        /// This provides an appotunity to sort help items before creating a navigation tree.
+        /// This method gives an appotunity to sort help items before creating a navigation tree.
         /// Sorting means that items at the same level of the navigation tree will be placed in order, defined herein.
         /// </summary>        
         protected virtual IEnumerable<HelpItem> SortItems(IEnumerable<HelpItem> helpItems)
@@ -76,13 +74,13 @@ namespace Inceptum.WebApi.Help
             return tocItem;
         }
 
-        public sealed class TreeNode
+        sealed class TreeNode
         {
             public string Id;
             public HelpItem Data;
-            public IList<TreeNode> Children = new List<TreeNode>();
+            public readonly IList<TreeNode> Children = new List<TreeNode>();
 
-            public void AddByPath(string[] path, HelpItem data)
+            public void AddByPath(IEnumerable<string> path, HelpItem data)
             {
                 if (path == null) throw new ArgumentNullException("path");
 
@@ -102,46 +100,27 @@ namespace Inceptum.WebApi.Help
             }
         }
 
-        public void RegisterBuilder(IHelpBuilder builder)
+        /// <summary>
+        /// Registers a <paramref name="builder"/> for participation in help page building process.
+        /// </summary>
+        /// <param name="builder">Builder instance</param>        
+        public HelpProvider RegisterBuilder(IHelpBuilder builder)
         {
             if (builder == null) throw new ArgumentNullException("builder");
 
-            if (m_Builders.Any(x => x.GetType() == builder.GetType()))
-            {
-                throw new InvalidOperationException(string.Format("Builder of type {0} is already registered.", builder.GetType()));
-            }
-
             m_Builders.Add(builder);
+
+            return this;
         }
 
-        public void UnregisterBuilder(Type concreteType)
+        /// <summary>
+        /// Clears builders chain
+        /// </summary>
+        /// <returns></returns>
+        public HelpProvider ClearBuilders()
         {
-            if (concreteType == null) throw new ArgumentNullException("concreteType");
-
-            var builder = findBuilder(concreteType);
-            if (builder != null)
-            {
-                m_Builders.Remove(builder);
-            }
+            m_Builders.Clear();
+            return this;
         }
-
-        public T FindBuilder<T>() where T : IHelpBuilder
-        {
-            var tuple = findBuilder(typeof(T));
-
-            return tuple != null ? (T)tuple : default(T);
-        }
-
-        private IHelpBuilder findBuilder(Type actualType)
-        {
-            if (actualType == null) throw new ArgumentNullException("actualType");
-
-            return m_Builders.FirstOrDefault(x => x.GetType() == actualType);
-        }
-    }
-
-    public interface IPdfTemplateProvider
-    {
-        Paragraph GetTemplate(string name, object data, BaseFont defaultFont);
     }
 }
