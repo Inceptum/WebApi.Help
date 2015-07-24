@@ -46,7 +46,7 @@ internal void ConfigureApiHelpPage(HttpConfiguration config) {
  private static HelpItem[] addDynamicContent()
 {
 	return new[] {
-		new HelpItem("/some/path/TestPage") { Title = "TestPage",   Data = "<p id='TestPage'><b>Динамический контент</b><br/>Это нелокализованный динамический контент, добавленный через кастомный <b>HelpBuilder</b></p>", Template = null }
+		new HelpItem("/some/path/TestPage") { Title = "TestPage",   Data = "<p id='TestPage'><b>Р­С‚Рѕ РґРёРЅР°РјРёС‡РµСЃРєРёР№ РєРѕРЅС‚РµРЅС‚</b><br/>РќРµР»РѕРєР°Р»РёР·РѕРІР°РЅРЅС‹Р№ РґРёРЅР°РјРёС‡РµСЃРєРёР№ РєРѕРЅС‚РµРЅС‚</p>", Template = null }
 	};
 }
  
