@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.Http.Routing;
@@ -15,7 +18,7 @@ namespace Inceptum.WebApi.Help
     public sealed class HelpPageConfiguration
     {
         private readonly HttpConfiguration m_HttpConfiguration;
-        private string m_RouteTemplate = HelpPageHandler.DEFAULT_HELP_PAGE_ROUTE_TEMPLATE;
+        private string m_RouteBaseUri = "/help";
         private Uri m_SamplesBaseUri = new Uri(string.Format("http://{0}", Environment.MachineName ?? "localhost"));
         private Type[] m_AutoDocumentedTypes = new Type[0];
         private string m_AutoDocumentedTypesTocPath;
@@ -36,8 +39,7 @@ namespace Inceptum.WebApi.Help
         }
 
         /// <summary>
-        /// Gets and instance of the service locator
-        /// TODO[tv]: Not sure we gonna need it public
+        /// Gets and instance of the service locator        
         /// </summary>
         public IServiceLocator ServiceLocator
         {
@@ -50,16 +52,15 @@ namespace Inceptum.WebApi.Help
         }
 
         /// <summary>
-        /// Configures a route to listen for help page requests.
-        /// The route must have {*resource} part at it's end.
-        /// Valid route example are api/help/{*resource}, apihelp/{*resource}, help/{*resource}.
+        /// Configures a base uri for help page requests.        
+        /// Valid example are /api/help/{*resource}, /apihelp/{*resource}, /help/{*resource}.
         /// </summary>
-        public HelpPageConfiguration Route(string routeTemplate)
+        public HelpPageConfiguration Route(string uri)
         {
-            if (string.IsNullOrWhiteSpace(routeTemplate)) throw new ArgumentNullException(routeTemplate);
-            if (!routeTemplate.EndsWith("{*resource}")) throw new ArgumentException("Template must contain {*resource} part at the end of it", "routeTemplate");
+            if (string.IsNullOrWhiteSpace(uri)) throw new ArgumentNullException(uri);
+            if (!uri.StartsWith("/")) throw new ArgumentException(string.Format("The '{0}' is not valid value for route base URI", uri));
 
-            m_RouteTemplate = routeTemplate.TrimEnd('/', '\\');
+            m_RouteBaseUri = new Uri(uri, UriKind.Relative).ToString().TrimEnd('/', '\\');
 
             return this;
         }
@@ -162,14 +163,7 @@ namespace Inceptum.WebApi.Help
         {
             m_HttpConfiguration.Services.Replace(typeof(IApiExplorer), m_ServiceLocator.Get<IExtendedApiExplorer>());
             m_HttpConfiguration.Services.Replace(typeof(IDocumentationProvider), m_ServiceLocator.Get<IExtendedDocumentationProvider>());
-
-            var helpRouteHandler = new HelpPageHandler(m_ServiceLocator.Get<IHelpProvider>(), m_ServiceLocator.Get<IContentProvider>(), m_PdfTemplateProviders);
-            m_HttpConfiguration.Routes.Insert(0, HelpPageHandler.HELP_PAGE_ROUTE_NAME,
-                new HttpRoute(m_RouteTemplate,
-                    null, // defaults
-                    new HttpRouteValueDictionary(new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) }),
-                    null, // data tokens
-                    helpRouteHandler));
+            m_HttpConfiguration.MessageHandlers.Insert(0, new HelpPageHandler(m_RouteBaseUri, m_ServiceLocator.Get<IHelpProvider>(), m_ServiceLocator.Get<IContentProvider>(), m_PdfTemplateProviders));
         }
 
         private IHelpProvider createDefaultHelpProvider()

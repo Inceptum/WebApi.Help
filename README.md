@@ -10,7 +10,7 @@ The package currently supports Russian and English languages.
 ```C#
 internal void ConfigureApiHelpPage(HttpConfiguration config) {
   config.UseHelpPage(
-	help => help.Route("api/help/{*resource}")	// help page will listen on http://yourmachine/api/help
+	help => help.Route("/api/help")	// help page will listen at http://yourmachine/api/help
 				// This base uri will be used for generation API endpoints uri examples
 				.SamplesUri(new Uri("http://myapi.mycompany.com:8080"))
 				// Replace default documentation provider

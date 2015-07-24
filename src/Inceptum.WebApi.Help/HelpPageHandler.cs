@@ -19,19 +19,19 @@ namespace Inceptum.WebApi.Help
     /// </summary>
     sealed class HelpPageHandler : DelegatingHandler
     {
-        private const string COOKIE_NAME = "help-page";        
+        private const string COOKIE_NAME = "help-page";
+        private readonly string m_BaseUri;
         private readonly IContentProvider m_ContentProvider;
         private readonly IHelpProvider m_HelpProvider;
         private readonly List<Tuple<IPdfTemplateProvider, int>> m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>();
-        private readonly BaseFont m_ArialFont;
-        internal const string HELP_PAGE_ROUTE_NAME = "WebAPIHelpPageRoute";
-        internal const string DEFAULT_HELP_PAGE_ROUTE_TEMPLATE = "help/{*resource}";
-        internal const string RESOURCE_PARAMETER_NAME = "resource";
+        private readonly BaseFont m_ArialFont;                
         
-        public HelpPageHandler(IHelpProvider helpProvider, IContentProvider contentProvider, IEnumerable<Tuple<IPdfTemplateProvider, int>> pdfTemplateProviders)
+        public HelpPageHandler(string baseUri, IHelpProvider helpProvider, IContentProvider contentProvider, IEnumerable<Tuple<IPdfTemplateProvider, int>> pdfTemplateProviders)
         {
+            if (string.IsNullOrWhiteSpace(baseUri)) throw new ArgumentNullException("baseUri");
             if (contentProvider == null) throw new ArgumentNullException("contentProvider");
             if (helpProvider == null) throw new ArgumentNullException("helpProvider");
+            m_BaseUri = baseUri;
             m_ContentProvider = contentProvider;
             m_HelpProvider = helpProvider;
             m_PdfTemplateProviders = new List<Tuple<IPdfTemplateProvider, int>>(pdfTemplateProviders.OrderBy(p => p.Item2));
@@ -40,19 +40,23 @@ namespace Inceptum.WebApi.Help
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {            
+        {
+            if (!shouldHandle(request))
+            {
+                return base.SendAsync(request, cancellationToken);
+            }
+
             setupCulture(request);
 
             var resourceName = getResourceName(request);
 
             // When requested at help root address,  e.g. /api/help.
             // Redirect to index.html, for the relative pathes to work properly.
-            if (resourceName == null)
+            if (string.IsNullOrWhiteSpace(resourceName))
             {
                 var redirect = request.CreateResponse(HttpStatusCode.Redirect);
-                var redirectPath = request.GetRequestContext().Url.Route(HELP_PAGE_ROUTE_NAME, new Dictionary<string, object>() { { RESOURCE_PARAMETER_NAME, "index.html" } });
-                redirect.Headers.Location = new Uri(redirectPath, UriKind.Relative);
-                return Task.FromResult(redirect);                
+                redirect.Headers.Location = new Uri(m_BaseUri + "/index.html", UriKind.Relative);
+                return Task.FromResult(redirect);
             }
 
             switch (resourceName)
@@ -82,14 +86,16 @@ namespace Inceptum.WebApi.Help
                             Content = new ByteArrayContent(staticContent.ContentBytes)
                         };
                         response.Content.Headers.ContentType = new MediaTypeHeaderValue(staticContent.ContentType);
-
-                        //TODO[tv]: Add caching ?
-
+                        //response.Headers.CacheControl = new CacheControlHeaderValue()
+                        //    {
+                        //        Public = true,
+                        //        MaxAge = TimeSpan.FromMinutes(1)
+                        //    };
                         return Task.FromResult(response);
                     }
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent(string.Format("The resource at {0} was not found", request.RequestUri)) });
+                    break;
             }
-
+            return base.SendAsync(request, cancellationToken);
         }
 
         private byte[] createHelpPdf()
@@ -144,6 +150,33 @@ namespace Inceptum.WebApi.Help
             return sections;
         }
 
+        private bool shouldHandle(HttpRequestMessage request)
+        {
+            if (request == null) throw new ArgumentNullException("request");
+
+            // Handle HTTP(S) requests only
+            if (!string.Equals(request.RequestUri.Scheme, "http", StringComparison.InvariantCultureIgnoreCase)
+                && !string.Equals(request.RequestUri.Scheme, "https", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return false;
+            }
+
+            // Handle GET-requests only
+            if (request.Method != HttpMethod.Get)
+            {
+                return false;
+            }
+
+            // Handle requests which starts with configured prefix only
+            if (!request.RequestUri.LocalPath.StartsWith(m_BaseUri, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
         private static void setupCulture(HttpRequestMessage request)
         {
             if (request == null) throw new ArgumentNullException("request");
@@ -164,13 +197,17 @@ namespace Inceptum.WebApi.Help
             Strings.Culture = ci;
         }
 
-        private static string getResourceName(HttpRequestMessage request)
+        private string getResourceName(HttpRequestMessage request)
         {
             if (request == null) throw new ArgumentNullException("request");
 
-            var resourceName = request.GetRouteData().Values["resource"];
+            var resourceName = request.RequestUri.LocalPath
+                                 .Remove(0, m_BaseUri.Length)
+                                 .Trim(new[] { '\\', '/' })
+                                 .ToLowerInvariant();
 
-            return resourceName != null ? resourceName.ToString() : null;         
+            // api/help -> api/help/index.html
+            return resourceName;
         }
     }
 }

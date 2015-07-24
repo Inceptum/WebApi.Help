@@ -45,7 +45,7 @@ namespace Sandbox
             config.MapHttpAttributeRoutes();
 
             config.UseHelpPage(
-                help => help.Route("api/help/{*resource}")
+                help => help.Route("/api/help")
                             .SamplesUri(new Uri("http://myapi.mycompany.com:8080"))
                             .WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
                             .ConfigureHelpProvider(hp =>
