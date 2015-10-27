@@ -312,12 +312,13 @@ namespace Inceptum.WebApi.Help.ModelDescriptions
             ModelDescription elementModelDescription = GetOrCreateModelDescription(elementType);
             if (elementModelDescription != null)
             {
+                var modelDocumentation = DocumentationProvider.GetDocumentation(modelType);
                 return new CollectionModelDescription
                 {
-                    Name = ModelNameHelper.GetModelName(modelType),                    
+                    Name = ModelNameHelper.GetModelName(modelType),
                     ModelType = modelType,
                     ElementDescription = elementModelDescription,
-                    Documentation = string.Format(Strings.CollectionDocumentationTemplate, elementModelDescription.Name)
+                    Documentation = !string.IsNullOrWhiteSpace(modelDocumentation) ? modelDocumentation : string.Format(Strings.CollectionDocumentationTemplate, elementModelDescription.Name)
                 };
             }
 

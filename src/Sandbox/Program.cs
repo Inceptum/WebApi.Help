@@ -54,7 +54,7 @@ namespace Sandbox
                                         .RegisterBuilder(new ApiDocumentationBuilder(help, "API"))
                                         .RegisterBuilder(new DelegatingBuilder(addDynamicContent))
                                         .RegisterBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help.")))
-                            .AutoDocumentedTypes(new[] { typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>) }, "API/DataTypes"));
+                            .AutoDocumentedTypes(new[] { typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>), typeof(ExtraValuesList) }, "API/DataTypes"));
 
             // Global sample data configuration: whenever the specified type is requested (doesn't metter if it's a top level type, or a part of complex model), the provided data will be used 
             config.SetSampleObjects(new Dictionary<Type, object>()
@@ -81,4 +81,6 @@ namespace Sandbox
             };
         }
     }
+
+   
 }
