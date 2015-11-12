@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
@@ -10,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
+using Inceptum.WebApi.Help.Description;
 using Inceptum.WebApi.Help.ModelDescriptions;
 using Inceptum.WebApi.Help.SampleGeneration;
 
@@ -64,12 +64,23 @@ namespace Inceptum.WebApi.Help
 
         public Collection<ApiDescription> ApiDescriptions
         {
-            get { return m_InnerExplorer.ApiDescriptions; }
+            get
+            {
+                var descriptions = m_InnerExplorer.ApiDescriptions
+                    .Select((ad, i) => new { Index = i, ApiDescription = ad })
+                    .GroupBy(ad => ad.ApiDescription.ActionDescriptor.ControllerDescriptor)
+                    .OrderBy(g => getOrderStr(g.Key.GetCustomAttributes<ApiExplorerOrderAttribute>().FirstOrDefault(), g.First().Index))
+                    .SelectMany(g => g.OrderBy(ad => getOrderStr(ad.ApiDescription.ActionDescriptor.GetCustomAttributes<ApiExplorerOrderAttribute>().FirstOrDefault(), ad.Index)))
+                    .Select(g => g.ApiDescription)
+                    .ToList();
+
+                return new Collection<ApiDescription>(descriptions);
+            }
         }
 
         public ICollection<ExtendedApiDescription> ExtendedApiDescriptions
         {
-            get { return m_InnerExplorer.ApiDescriptions.Select(ExtendDescription).ToArray(); }
+            get { return ApiDescriptions.Select(ExtendDescription).ToArray(); }
         }
 
         protected virtual ExtendedApiDescription ExtendDescription(ApiDescription apiDescription)
@@ -207,6 +218,11 @@ namespace Inceptum.WebApi.Help
             {
                 apiDescription.SampleResponses.Add(item.Key, item.Value);
             }
+        }
+
+        static Int64 getOrderStr(ApiExplorerOrderAttribute orderAttribute, Int64 originalOrder)
+        {
+            return orderAttribute == null ? (Int32.MaxValue + originalOrder + 1) : orderAttribute.Order;
         }
     }
 }

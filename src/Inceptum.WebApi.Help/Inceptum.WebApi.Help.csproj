@@ -82,6 +82,7 @@
     <Compile Include="Builders\MarkdownHelpBuilder.cs" />
     <Compile Include="Builders\TypesDocumentationBuilder.cs" />
     <Compile Include="DefaultPdfTemplateProvider.cs" />
+    <Compile Include="Description\ApiExplorerOrderAttribute.cs" />
     <Compile Include="ExtendedApiDescription.cs" />
     <Compile Include="ExtendedApiExplorer.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

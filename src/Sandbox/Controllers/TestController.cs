@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using Inceptum.WebApi.Help.Description;
 
 namespace Sandbox.Controllers
 {
@@ -10,6 +11,7 @@ namespace Sandbox.Controllers
     /// </summary>
     /// <remarks>Test controller description</remarks>
     /// <remarks lang="ru">Описание для тестового контроллера</remarks>
+    [ApiExplorerOrder(Order = 1)]
     public class TestController : ApiController
     {
         /// <summary>

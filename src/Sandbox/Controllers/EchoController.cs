@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Inceptum.WebApi.Help.Description;
 
 namespace Sandbox.Controllers
 {
@@ -15,6 +16,7 @@ namespace Sandbox.Controllers
     /// </summary>   
     /// <remarks>Simple echo and user controller</remarks>
     /// <remarks lang="ru">Простой контроллер эха и пользователей</remarks>
+    [ApiExplorerOrder(Order = 5)]
     public class EchoController : ApiController
     {
         /// <summary>Echo service.</summary>      
@@ -42,6 +44,7 @@ namespace Sandbox.Controllers
         /// <remarks>Returns user info by identifier.</remarks>
         /// <remarks lang="ru">Возвращает информацию о пользователе по его идентификатору.</remarks>
         [HttpGet, Route("api/users/{id:int}")]
+        [ApiExplorerOrder(Order = 2)]
         public User GetUser(int? id)
         {
             return new User();
@@ -54,11 +57,11 @@ namespace Sandbox.Controllers
         /// <remarks>Get a collection of users.</remarks>
         /// <remarks lang="ru">Получить список пользователей.</remarks>
         [HttpGet, Route("api/users"), ResponseType(typeof(PagingResponseModel<User>))]
+        [ApiExplorerOrder(Order = 3)]
         public HttpResponseMessage GetUsers()
         {
             return Request.CreateResponse(HttpStatusCode.OK);
         }
-        
 
         /// <summary>Get user's contacts.</summary>
         /// <summary lang="ru">Получить контакты пользователя.</summary>
@@ -67,6 +70,7 @@ namespace Sandbox.Controllers
         /// <remarks>Returns user's contact information by id of the user.</remarks>
         /// <remarks lang="ru">Возвращает контакты пользователя по его идентификатору.</remarks>
         [HttpGet, Route("api/users/{id:int}/contacts")]
+        [ApiExplorerOrder(Order = 5)]
         public Contact GetContacts(int? id)
         {
             return new Contact();
@@ -79,6 +83,7 @@ namespace Sandbox.Controllers
         /// <remarks>Creates new user using request body data.</remarks>
         /// <remarks lang="ru">Создает нового пользователя, используя данные из тела запроса.</remarks>
         [HttpPost, ResponseType(typeof(User)), Route("api/users")]
+        [ApiExplorerOrder(Order = 1)]
         public HttpResponseMessage CreateUser(User dto)
         {
             return Request.CreateResponse(HttpStatusCode.Created, dto);

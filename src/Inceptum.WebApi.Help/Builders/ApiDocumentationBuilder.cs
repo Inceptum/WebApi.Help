@@ -31,18 +31,23 @@ namespace Inceptum.WebApi.Help.Builders
 
         protected virtual IEnumerable<HelpItem> CreateMethodGroupsHelp()
         {
-            return from @group in m_ServiceLocator.Get<IExtendedApiExplorer>().ExtendedApiDescriptions.GroupBy(x => x.Controller)
-                   let controllerDescriptor = @group.First().ActionDescriptor.ControllerDescriptor
-                   select new HelpItem(string.Format("{0}/{1}", m_TocRoot, controllerDescriptor.ControllerName))
-                       {
-                           Title = m_ServiceLocator.Get<IExtendedDocumentationProvider>().GetName(controllerDescriptor),
-                           Data = new
-                               {
-                                   name = @group.Key,
-                                   documentation = m_ServiceLocator.Get<IExtendedDocumentationProvider>().GetDocumentation(controllerDescriptor)
-                               },
-                           Template = GROUP_TEMPLATE_NAME
-                       };
+            var apiExplorer = m_ServiceLocator.Get<IExtendedApiExplorer>();
+
+            var documentationProvider = m_ServiceLocator.Get<IExtendedDocumentationProvider>();
+
+            return apiExplorer
+                .ExtendedApiDescriptions.GroupBy(x => x.Controller)
+                .Select(@group => new {@group, controllerDescriptor = @group.First().ActionDescriptor.ControllerDescriptor})
+                .Select(@t => new HelpItem(string.Format("{0}/{1}", m_TocRoot, @t.controllerDescriptor.ControllerName))
+                {
+                    Title = documentationProvider.GetName(@t.controllerDescriptor),
+                    Data = new
+                    {
+                        name = @t.@group.Key,
+                        documentation = documentationProvider.GetDocumentation(@t.controllerDescriptor)
+                    },
+                    Template = GROUP_TEMPLATE_NAME
+                });
         }
 
         protected virtual IEnumerable<HelpItem> CreateMethodsHelp()
