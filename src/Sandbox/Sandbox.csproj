@@ -66,7 +66,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contact.cs" />
+    <Compile Include="ExtraData.cs" />
+    <Compile Include="ExtraValuesList.cs" />
     <Compile Include="Gender.cs" />
+    <Compile Include="LinksCollection.cs" />
     <Compile Include="PagingResponseModel.cs" />
     <Compile Include="Resources.ru.Designer.cs">
       <DependentUpon>Resources.ru.resx</DependentUpon>

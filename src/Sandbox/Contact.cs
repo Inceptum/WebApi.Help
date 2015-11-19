@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Sandbox
@@ -44,16 +43,4 @@ namespace Sandbox
         /// </summary>
         public LinksCollection Links = new LinksCollection();
     }
-
-    /// <summary>
-    /// A collection of links
-    /// </summary>
-    /// <summary lang="ru">
-    /// Коллекция ссылок
-    /// </summary>
-    public class LinksCollection : Dictionary<string, string>
-    {
-
-    }
-
 }

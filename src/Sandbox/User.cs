@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sandbox
+﻿namespace Sandbox
 {
     /// <summary>
     /// User DTO
@@ -49,32 +47,5 @@ namespace Sandbox
         /// Список дополнительных полей документа
         /// </summary>
         public ExtraValuesList ExtraValuesList;
-    }
-
-    /// <summary>
-    /// Some extra information
-    /// </summary>
-    /// <summary lang="ru">
-    /// Некоторая дополнительная информация
-    /// </summary>
-    public class ExtraData
-    {
-        /// <summary>
-        /// The data object
-        /// </summary>
-        /// <summary lang="ru">
-        /// Данные
-        /// </summary>
-        public object Data;
-    }
-
-    /// <summary>
-    /// List of document extra fields
-    /// </summary>
-    /// <summary lang="ru">
-    /// Список дополнительных полей документа
-    /// </summary>
-    public class ExtraValuesList : List<object>
-    {
     }
 }
