@@ -177,7 +177,7 @@ namespace Inceptum.WebApi.Help
             }
             if (m_AutoDocumentedTypes.Length != 0)
             {
-                helpProvider.RegisterBuilder(new TypesDocumentationBuilder(m_HttpConfiguration.GetModelDescriptionGenerator(), m_AutoDocumentedTypes, m_AutoDocumentedTypesTocPath ?? TypesDocumentationBuilder.DEFAULT_TOC_PATH));
+                helpProvider.RegisterBuilder(new TypesDocumentationBuilder(m_HttpConfiguration, m_AutoDocumentedTypes, m_AutoDocumentedTypesTocPath ?? TypesDocumentationBuilder.DEFAULT_TOC_PATH));
             }
             return helpProvider;
         }
