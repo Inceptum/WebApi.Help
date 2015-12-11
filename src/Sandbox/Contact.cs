@@ -30,7 +30,7 @@ namespace Sandbox
         /// <summary>
         /// Extra data, associated with the contact
         /// </summary>
-        /// <summary>
+        /// <summary lang="ru">
         /// Дополнительные данные, ассоциированные с контактом
         /// </summary>
         public ExtraData Extra = new ExtraData();
