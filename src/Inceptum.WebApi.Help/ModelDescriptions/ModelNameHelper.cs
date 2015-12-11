@@ -10,9 +10,15 @@ namespace Inceptum.WebApi.Help.ModelDescriptions
         public static string GetModelName(Type type)
         {
             var displayNameAttribute = type.GetCustomAttribute<System.ComponentModel.DisplayNameAttribute>();
-            if (displayNameAttribute != null && !String.IsNullOrEmpty(displayNameAttribute.DisplayName))
+            if (displayNameAttribute != null && !string.IsNullOrWhiteSpace(displayNameAttribute.DisplayName))
             {
                 return displayNameAttribute.DisplayName;
+            }
+
+            if (type.IsArray)
+            {
+                var arrayElementType = type.GetElementType();
+                return "ArrayOf" + GetModelName(arrayElementType);
             }
 
             string modelName = type.Name;
