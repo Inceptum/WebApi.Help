@@ -15,19 +15,25 @@ namespace Inceptum.WebApi.Help.Tests.ModelDescriptions
         [TestCase(typeof(TypeCode), Result = "TypeCode")]
         [TestCase(typeof(ModelNameHelperTests), Result = "ModelNameHelperTests")]
         [TestCase(typeof(List<int>), Result = "ListOfInt32")]
-        [TestCase(typeof(Suffer[]), Result = "ArrayOfJoy")]
-        [TestCase(typeof(List<Suffer>), Result = "ListOfJoy")]
-        [TestCase(typeof(IEnumerable<Suffer>), Result = "IEnumerableOfJoy")]
-        [TestCase(typeof(ICollection<Suffer>), Result = "ICollectionOfJoy")]
-        [TestCase(typeof(Dictionary<int, Suffer>), Result = "DictionaryOfInt32AndJoy")]
+        [TestCase(typeof(TypeAInternal[]), Result = "ArrayOfTypeA")]
+        [TestCase(typeof(List<TypeAInternal>), Result = "ListOfTypeA")]
+        [TestCase(typeof(IEnumerable<TypeAInternal>), Result = "IEnumerableOfTypeA")]
+        [TestCase(typeof(ICollection<TypeAInternal>), Result = "ICollectionOfTypeA")]
+        [TestCase(typeof(Dictionary<int, TypeAInternal>), Result = "DictionaryOfInt32AndTypeA")]
+        [TestCase(typeof(TypeBbb<int, string>[]), Result = "ArrayOfTypeBbbOfInt32AndString")]
         public string ShouldGetCorrectModelName(Type type)
         {
             return ModelNameHelper.GetModelName(type);
         }
     }
 
-    [DisplayName(@"Joy")]
-    public class Suffer
+    [DisplayName(@"TypeA")]
+    public class TypeAInternal
+    {
+        
+    }
+
+    public class TypeBbb<T, U>
     {
         
     }

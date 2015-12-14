@@ -35,15 +35,15 @@ namespace Inceptum.WebApi.Help.Builders
 
         public IEnumerable<HelpItem> BuildHelp()
         {
-            return new[] { new HelpItem(m_TocPath) { Title = Strings.DataTypes_Title } }
+            return new[] {new HelpItem(m_TocPath) {Title = Strings.DataTypes_Title}}
                 .Concat(
                     m_TypesToDocument.Select(x => ModelDescriptionGenerator.GetOrCreateModelDescription(x))
-                        .Select(x => new HelpItem(string.Format("{0}/{1}", m_TocPath, x.ModelType.Name))
-                              {
-                                  Title = x.Name,
-                                  Template = TEMPLATE_NAME,
-                                  Data = x
-                              }));
+                        .Select(x => new HelpItem(string.Format("{0}/{1}", m_TocPath, ModelNameHelper.GetModelName(x.ModelType)))
+                        {
+                            Title = x.Name,
+                            Template = TEMPLATE_NAME,
+                            Data = x
+                        }));
         }
     }
 }
