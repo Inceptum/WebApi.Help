@@ -3,17 +3,17 @@
 This package is intended to provide a help page for self-hosted ASP.NET Web API projects.
 When added to an application it works by scanning available Web API routes and composing a help page out of them.
 This page is then published at **/help** uri (configurable). 
-API methods documentation is taken from Visual Studio XML documentation files with extra support for custom documentation providers.
+API methods and types documentation is taken from Visual Studio XML documentation files with extra support for custom documentation providers.
 The package currently supports Russian and English languages.
 
 **Usage sample**
 ```C#
 internal void ConfigureApiHelpPage(HttpConfiguration config) {
   config.UseHelpPage(
-	help => help.Route("/api/help")	// help page will listen at http://yourmachine/api/help
-				// This base uri will be used for generation API endpoints uri examples
+	help => help.Route("/api/help")	// help page will be at http://yourmachine/api/help
+				// This will be used as base uri for API methods urls generation   
 				.SamplesUri(new Uri("http://myapi.mycompany.com:8080"))
-				// Replace default documentation provider
+				// Setup documentation provider
 				.WithDocumentationProvider(new XmlDocumentationProvider(Environment.CurrentDirectory))
 				// Configure default help provider
 				.ConfigureHelpProvider(hp =>
@@ -21,14 +21,14 @@ internal void ConfigureApiHelpPage(HttpConfiguration config) {
 						hp.ClearBuilders()
 							.RegisterBuilder(new ErrorsDocumentationBuilder("API/Errors"))	// Add http error codes documentation
 							.RegisterBuilder(new ApiDocumentationBuilder(help, "API"))		// Add API methods documentation
-							.RegisterBuilder(new DelegatingBuilder(addDynamicContent))		// Add some dynamic content
-							.RegisterBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help.")))	// Adds markdown pages from resources
-				// Builds documentation for given types
+							.RegisterBuilder(new DelegatingBuilder(addDynamicContent))		// Add some dynamically generated content
+							.RegisterBuilder(new MarkdownHelpBuilder(typeof(Program).Assembly, "Sandbox.Help.")))	// Add markdown pages from resources
+				// Automatically build documentation for given types
 				.AutoDocumentedTypes(new[] { typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>) }, "API/DataTypes"));
   );
   
   // Global sample data configuration: whenever the specified type is requested 
-  // (doesn't metter if it's a top level type, or a part of complex model), the provided object will be used
+  // (doesn't matter if it's a top level type, or a part of a complex model), the provided object will be used
   config.SetSampleObjects(new Dictionary<Type, object>()
   {
     { typeof(Contact), new Contact { Phone = "0123456789", Email = "test@example.com" } },
