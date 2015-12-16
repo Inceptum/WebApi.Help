@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Inceptum.WebApi.Help.Common;
 
 namespace Inceptum.WebApi.Help.SampleGeneration
 {
@@ -13,13 +14,14 @@ namespace Inceptum.WebApi.Help.SampleGeneration
     /// </summary>
     public class ObjectGenerator
     {
-        private readonly IDictionary<Type, object> m_SampleObjects;
-        internal const int DEFAULT_COLLECTION_SIZE = 2;
+        private const int DEFAULT_COLLECTION_SIZE = 2;
+
+        private readonly IDictionary<Type, ValueHolder> m_SampleObjects;
         private readonly SimpleTypeObjectGenerator m_SimpleObjectGenerator = new SimpleTypeObjectGenerator();
 
-        public ObjectGenerator(IDictionary<Type, object> sampleObjects = null)
+        public ObjectGenerator(IDictionary<Type, ValueHolder> sampleObjects = null)
         {
-            m_SampleObjects = sampleObjects ?? new Dictionary<Type, object>();
+            m_SampleObjects = sampleObjects ?? new Dictionary<Type, ValueHolder>();
         }
 
         /// <summary>
@@ -53,10 +55,10 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         {
             try
             {
-                object sample;
+                ValueHolder sample;
                 if (m_SampleObjects.TryGetValue(type, out sample))
                 {
-                    return sample;
+                    return sample.Value;
                 }
 
                 if (SimpleTypeObjectGenerator.CanGenerateObject(type))

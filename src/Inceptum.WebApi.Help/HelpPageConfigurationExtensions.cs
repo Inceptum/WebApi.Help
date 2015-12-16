@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Inceptum.WebApi.Help.Common;
 using Inceptum.WebApi.Help.ModelDescriptions;
 using Inceptum.WebApi.Help.SampleGeneration;
 
@@ -43,9 +44,37 @@ namespace Inceptum.WebApi.Help
         /// </summary>
         /// <param name="config">The <see cref="HttpConfiguration" />.</param>
         /// <param name="sampleObjects">The sample objects.</param>
-        public static void SetSampleObjects(this HttpConfiguration config, IDictionary<Type, object> sampleObjects)
+        public static HttpConfiguration SetSampleObjects(this HttpConfiguration config, IDictionary<Type, object> sampleObjects)
         {
-            config.GetSamplesGenerator().SampleObjects = sampleObjects;
+            config.GetSamplesGenerator().SampleObjects = sampleObjects.ToDictionary(so => so.Key, so => ValueHolder.Create(so.Value));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the object that will be used by the formatters to produce sample request/response.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="type"></param>
+        /// <param name="sampleObject">The sample object.</param>
+        public static HttpConfiguration SetSampleObject(this HttpConfiguration config, Type type, object sampleObject)
+        {
+            config.GetSamplesGenerator().SampleObjects[type] = ValueHolder.Create(sampleObject);
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the object that will be used by the formatters to produce sample request/response.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="type"></param>
+        /// <param name="sampleObjectFactory">The sample object factory.</param>
+        public static HttpConfiguration SetSampleObject(this HttpConfiguration config, Type type, Func<object> sampleObjectFactory)
+        {
+            config.GetSamplesGenerator().SampleObjects[type] = ValueHolder.Create(sampleObjectFactory());
+
+            return config;
         }
 
         /// <summary>
@@ -56,10 +85,45 @@ namespace Inceptum.WebApi.Help
         /// <param name="mediaType">The media type.</param>
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
-        public static void SetSampleRequest(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
+        public static HttpConfiguration SetSampleRequest(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
         {
             config.GetSamplesGenerator()
-                .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, new[] { "*" }), sample);
+                .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, new[] { "*" }), ValueHolder.Create(sample));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the sample request directly for the specified media type and action with parameters.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="sampleFactory">The sample request factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="controllerName">Name of the controller.</param>
+        /// <param name="actionName">Name of the action.</param>
+        /// <param name="parameterNames">The parameter names.</param>
+        public static HttpConfiguration SetSampleRequest(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
+        {
+            config.GetSamplesGenerator()
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, parameterNames), ValueHolder.Create(sampleFactory));
+
+            return config;
+        }
+
+        /// <summary>
+        ///  Sets the sample request directly for the specified media type and action.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="sampleFactory">The sample request factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="controllerName">Name of the controller.</param>
+        /// <param name="actionName">Name of the action.</param>
+        public static HttpConfiguration SetSampleRequest(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
+        {
+            config.GetSamplesGenerator()
+                .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, new[] { "*" }), ValueHolder.Create(sampleFactory));
+
+            return config;
         }
 
         /// <summary>
@@ -71,10 +135,12 @@ namespace Inceptum.WebApi.Help
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
         /// <param name="parameterNames">The parameter names.</param>
-        public static void SetSampleRequest(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
+        public static HttpConfiguration SetSampleRequest(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
         {
             config.GetSamplesGenerator()
-                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, parameterNames), sample);
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Request, controllerName, actionName, parameterNames), ValueHolder.Create(sample));
+
+            return config;
         }
 
         /// <summary>
@@ -85,10 +151,12 @@ namespace Inceptum.WebApi.Help
         /// <param name="mediaType">The media type.</param>
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
-        public static void SetSampleResponse(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
+        public static HttpConfiguration SetSampleResponse(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
         {
             config.GetSamplesGenerator()
-                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, new[] { "*" }), sample);
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, new[] { "*" }), ValueHolder.Create(sample));
+
+            return config;
         }
 
         /// <summary>
@@ -100,10 +168,45 @@ namespace Inceptum.WebApi.Help
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
         /// <param name="parameterNames">The parameter names.</param>
-        public static void SetSampleResponse(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
+        public static HttpConfiguration SetSampleResponse(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
         {
             config.GetSamplesGenerator()
-                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, parameterNames), sample);
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, parameterNames), ValueHolder.Create(sample));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the sample request directly for the specified media type of the action.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="sampleFactory">The sample response factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="controllerName">Name of the controller.</param>
+        /// <param name="actionName">Name of the action.</param>
+        public static HttpConfiguration SetSampleResponse(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType, string controllerName, string actionName)
+        {
+            config.GetSamplesGenerator()
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, new[] { "*" }), ValueHolder.Create(sampleFactory));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the sample response directly for the specified media type of the action with specific parameters.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="sampleFactory">The sample response factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="controllerName">Name of the controller.</param>
+        /// <param name="actionName">Name of the action.</param>
+        /// <param name="parameterNames">The parameter names.</param>
+        public static HttpConfiguration SetSampleResponse(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType, string controllerName, string actionName, params string[] parameterNames)
+        {
+            config.GetSamplesGenerator()
+                  .ActionSamples.Add(new HelpPageSampleKey(mediaType, SampleDirection.Response, controllerName, actionName, parameterNames), ValueHolder.Create(sampleFactory));
+
+            return config;
         }
 
         /// <summary>
@@ -112,9 +215,11 @@ namespace Inceptum.WebApi.Help
         /// <param name="config">The <see cref="HttpConfiguration" />.</param>        
         /// <param name="sample">The sample.</param>
         /// <param name="mediaType">The media type.</param>
-        public static void SetSampleForMediaType(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType)
+        public static HttpConfiguration SetSampleForMediaType(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType)
         {
-            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType), sample);
+            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType), ValueHolder.Create(sample));
+
+            return config;
         }
 
         /// <summary>
@@ -124,9 +229,38 @@ namespace Inceptum.WebApi.Help
         /// <param name="sample">The sample.</param>
         /// <param name="mediaType">The media type.</param>
         /// <param name="type">The parameter type or return type of an action.</param>
-        public static void SetSampleForType(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, Type type)
+        public static HttpConfiguration SetSampleForType(this HttpConfiguration config, object sample, MediaTypeHeaderValue mediaType, Type type)
         {
-            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType, type), sample);
+            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType, type), ValueHolder.Create(sample));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the sample directly for all actions with the specified media type.
+        /// </summary>        
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>        
+        /// <param name="sampleFactory">The sample factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        public static HttpConfiguration SetSampleForMediaType(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType)
+        {
+            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType), ValueHolder.Create(sampleFactory));
+
+            return config;
+        }
+
+        /// <summary>
+        /// Sets the sample directly for all actions with the specified type and media type.
+        /// </summary>
+        /// <param name="config">The <see cref="HttpConfiguration" />.</param>
+        /// <param name="sampleFactory">The sample factory.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="type">The parameter type or return type of an action.</param>
+        public static HttpConfiguration SetSampleForType(this HttpConfiguration config, Func<object> sampleFactory, MediaTypeHeaderValue mediaType, Type type)
+        {
+            config.GetSamplesGenerator().ActionSamples.Add(new HelpPageSampleKey(mediaType, type), ValueHolder.Create(sampleFactory));
+
+            return config;
         }
 
         /// <summary>
@@ -137,9 +271,11 @@ namespace Inceptum.WebApi.Help
         /// <param name="type">The type.</param>
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
-        public static void SetActualRequestType(this HttpConfiguration config, Type type, string controllerName, string actionName)
+        public static HttpConfiguration SetActualRequestType(this HttpConfiguration config, Type type, string controllerName, string actionName)
         {
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Request, controllerName, actionName, new[] { "*" }), type);
+
+            return config;
         }
 
         /// <summary>
@@ -151,9 +287,11 @@ namespace Inceptum.WebApi.Help
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
         /// <param name="parameterNames">The parameter names.</param>
-        public static void SetActualRequestType(this HttpConfiguration config, Type type, string controllerName, string actionName, params string[] parameterNames)
+        public static HttpConfiguration SetActualRequestType(this HttpConfiguration config, Type type, string controllerName, string actionName, params string[] parameterNames)
         {
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Request, controllerName, actionName, parameterNames), type);
+
+            return config;
         }
 
         /// <summary>
@@ -164,9 +302,11 @@ namespace Inceptum.WebApi.Help
         /// <param name="type">The type.</param>
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
-        public static void SetActualResponseType(this HttpConfiguration config, Type type, string controllerName, string actionName)
+        public static HttpConfiguration SetActualResponseType(this HttpConfiguration config, Type type, string controllerName, string actionName)
         {
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Response, controllerName, actionName, new[] { "*" }), type);
+
+            return config;
         }
 
         /// <summary>
@@ -178,12 +318,14 @@ namespace Inceptum.WebApi.Help
         /// <param name="controllerName">Name of the controller.</param>
         /// <param name="actionName">Name of the action.</param>
         /// <param name="parameterNames">The parameter names.</param>
-        public static void SetActualResponseType(this HttpConfiguration config, Type type, string controllerName, string actionName, params string[] parameterNames)
+        public static HttpConfiguration SetActualResponseType(this HttpConfiguration config, Type type, string controllerName, string actionName, params string[] parameterNames)
         {
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Response, controllerName, actionName, parameterNames), type);
+
+            return config;
         }
 
-        public static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)
+        internal static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)
         {
             return (HelpPageSampleGenerator)config.Properties.GetOrAdd(typeof(HelpPageSampleGenerator), k => new HelpPageSampleGenerator());
         }           

@@ -21,9 +21,9 @@ namespace Sandbox
             Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
             const string baseUri = "http://localhost:7777";
             var server = new HttpSelfHostServer(createApiConfiguration(baseUri));
-            Console.WriteLine("Starting host at {0}...", baseUri);
+            Console.WriteLine(@"Starting host at {0}...", baseUri);
             server.OpenAsync().Wait();
-            Console.WriteLine("Started. Press ENTER to stop");
+            Console.WriteLine(@"Started. Press ENTER to stop");
             Console.ReadLine();
             server.CloseAsync().Wait();
         }
@@ -57,19 +57,24 @@ namespace Sandbox
                             .AutoDocumentedTypes(new[] { typeof(Contact), typeof(User), typeof(Gender), typeof(ICollection<User>), typeof(IDictionary<string, Contact>), typeof(ExtraValuesList) }, "API/DataTypes"));
 
             // Global sample data configuration: whenever the specified type is requested (doesn't metter if it's a top level type, or a part of complex model), the provided data will be used 
-            config.SetSampleObjects(new Dictionary<Type, object>()
+            config.SetSampleObjects(new Dictionary<Type, object>
                 {
                     //{ typeof(User),new User { Age = 25, Name = "Martin Luter King" } },
                     { typeof(Contact),new Contact { Phone = "0123456789", Email = "test@example.com" } },
                     { typeof(ExtraData),new ExtraData { Data = "Some additional data" } }
                 });
 
+            //config.SetSampleObject();
+
             // Per-request samples configuration. Note the value here is expected be a string.
-            config.SetSampleResponse(JObject.FromObject(new
+            config.SetSampleResponse(() =>
+            {
+                return JObject.FromObject(new
                 {
-                    name = "Just created user",
+                    name = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? "Только что созданный пользователь" : "Just created user",
                     age = 1
-                }).ToString(Formatting.Indented), new MediaTypeHeaderValue("application/json"), "Echo", "CreateUser");
+                }).ToString(Formatting.Indented);
+            }, new MediaTypeHeaderValue("application/json"), "Echo", "CreateUser");
 
             return config;
         }
@@ -81,6 +86,4 @@ namespace Sandbox
             };
         }
     }
-
-   
 }

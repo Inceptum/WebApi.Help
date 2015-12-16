@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http.Description;
 using System.Xml.Linq;
+using Inceptum.WebApi.Help.Common;
 using Newtonsoft.Json;
 
 namespace Inceptum.WebApi.Help.SampleGeneration
@@ -18,7 +20,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
     /// <summary>
     /// This class generates the samples for the help page.
     /// </summary>
-    public class HelpPageSampleGenerator
+    internal class HelpPageSampleGenerator
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpPageSampleGenerator" /> class.
@@ -26,9 +28,9 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         public HelpPageSampleGenerator()
         {
             ActualHttpMessageTypes = new Dictionary<HelpPageSampleKey, Type>();
-            ActionSamples = new Dictionary<HelpPageSampleKey, object>();
-            SampleObjects = new Dictionary<Type, object>();
-            SampleObjectFactories = new List<Func<HelpPageSampleGenerator, Type, object>>
+            ActionSamples = new Dictionary<HelpPageSampleKey, ValueHolder>();
+            SampleObjects = new Dictionary<Type, ValueHolder>();
+            SampleObjectFactories = new List<Func<HelpPageSampleGenerator, Type, ValueHolder>>
             {
                 defaultSampleObjectFactory,
             };
@@ -43,12 +45,12 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         /// <summary>
         /// Gets the objects that are used directly as samples for certain actions.
         /// </summary>
-        public IDictionary<HelpPageSampleKey, object> ActionSamples { get; internal set; }
+        public IDictionary<HelpPageSampleKey, ValueHolder> ActionSamples { get; internal set; }
 
         /// <summary>
         /// Gets the objects that are serialized as samples by the supported formatters.
         /// </summary>
-        public IDictionary<Type, object> SampleObjects { get; internal set; }
+        public IDictionary<Type, ValueHolder> SampleObjects { get; internal set; }
 
         /// <summary>
         ///  Gets factories for the objects that the supported formatters will serialize as samples. Processed in order,
@@ -60,7 +62,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         ///  <code>SampleObjectFactories.Add(func)</code> to provide a fallback.
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is an appropriate nesting of generic types")]
-        public IList<Func<HelpPageSampleGenerator, Type, object>> SampleObjectFactories { get; private set; }
+        public IList<Func<HelpPageSampleGenerator, Type, ValueHolder>> SampleObjectFactories { get; private set; }
 
         /// <summary>
         /// Gets the request body samples for a given <see cref="System.Web.Http.Description.ApiDescription" />.
@@ -150,23 +152,18 @@ namespace Inceptum.WebApi.Help.SampleGeneration
             MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType,
             SampleDirection sampleDirection)
         {
-            object sample;
+            ValueHolder sample;
 
             // First, try to get the sample provided for the specified mediaType, sampleDirection, controllerName, actionName and parameterNames.
             // If not found, try to get the sample provided for the specified mediaType, sampleDirection, controllerName and actionName regardless of the parameterNames.
             // If still not found, try to get the sample provided for the specified mediaType and type.
             // Finally, try to get the sample provided for the specified mediaType.
-            if (
-                ActionSamples.TryGetValue(
-                    new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames),
-                    out sample) ||
-                ActionSamples.TryGetValue(
-                    new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, new[] { "*" }),
-                    out sample) ||
+            if (ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames), out sample) ||
+                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, new[] { "*" }), out sample) ||
                 ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, type), out sample) ||
                 ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType), out sample))
             {
-                return sample;
+                return sample.Value;
             }
 
             return null;
@@ -183,7 +180,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Even if all items in SampleObjectFactories throw, problem will be visible as missing sample.")]
         public virtual object GetSampleObject(Type type)
         {
-            object sampleObject;
+            ValueHolder sampleObject;
 
             if (!SampleObjects.TryGetValue(type, out sampleObject))
             {
@@ -197,7 +194,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
 
                     try
                     {
-                        sampleObject = factory(this, type);
+                        sampleObject = ValueHolder.Create(factory(this, type));
                         if (sampleObject != null)
                         {
                             break;
@@ -210,7 +207,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
                 }
             }
 
-            return sampleObject;
+            return (sampleObject ?? ValueHolder.Null).Value;
         }
 
         /// <summary>
@@ -366,11 +363,11 @@ namespace Inceptum.WebApi.Help.SampleGeneration
         }
 
         // Default factory for sample objects
-        private object defaultSampleObjectFactory(HelpPageSampleGenerator sampleGenerator, Type type)
+        private ValueHolder defaultSampleObjectFactory(HelpPageSampleGenerator sampleGenerator, Type type)
         {
             // Try to create a default sample object
             var objectGenerator = new ObjectGenerator(SampleObjects);
-            return objectGenerator.GenerateObject(type);
+            return ValueHolder.Create(objectGenerator.GenerateObject(type));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Handling the failure by returning the original string.")]
@@ -430,7 +427,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
                      parameterNamesSet.SetEquals(sampleKey.ParameterNames)) &&
                     sampleDirection == sampleKey.SampleDirection)
                 {
-                    yield return sample;
+                    yield return new KeyValuePair<HelpPageSampleKey, object>(sample.Key, sample.Value.Value);
                 }
             }
         }

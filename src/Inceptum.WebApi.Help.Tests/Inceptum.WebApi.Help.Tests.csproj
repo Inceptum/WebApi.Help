@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ValueHolder.cs" />
     <Compile Include="InvestigationTests.cs" />
     <Compile Include="ModelDescriptions\ModelNameHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

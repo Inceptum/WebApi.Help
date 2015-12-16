@@ -97,6 +97,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Fonts.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\ValueHolder.cs" />
     <Compile Include="Strings.ru.Designer.cs">
       <DependentUpon>Strings.ru.resx</DependentUpon>
       <AutoGen>True</AutoGen>
