@@ -183,7 +183,7 @@ namespace Inceptum.WebApi.Help
             config.GetSamplesGenerator().ActualHttpMessageTypes.Add(new HelpPageSampleKey(SampleDirection.Response, controllerName, actionName, parameterNames), type);
         }
 
-        internal static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)
+        public static HelpPageSampleGenerator GetSamplesGenerator(this HttpConfiguration config)
         {
             return (HelpPageSampleGenerator)config.Properties.GetOrAdd(typeof(HelpPageSampleGenerator), k => new HelpPageSampleGenerator());
         }           

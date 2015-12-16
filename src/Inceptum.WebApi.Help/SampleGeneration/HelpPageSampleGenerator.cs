@@ -18,7 +18,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
     /// <summary>
     /// This class generates the samples for the help page.
     /// </summary>
-    internal class HelpPageSampleGenerator
+    public class HelpPageSampleGenerator
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpPageSampleGenerator" /> class.
