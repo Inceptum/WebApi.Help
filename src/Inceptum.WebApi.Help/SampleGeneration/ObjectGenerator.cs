@@ -12,7 +12,7 @@ namespace Inceptum.WebApi.Help.SampleGeneration
     /// <summary>
     /// This class creates an object of a given type and populates it with sample data.
     /// </summary>
-    public class ObjectGenerator
+    internal class ObjectGenerator
     {
         private const int DEFAULT_COLLECTION_SIZE = 2;
 

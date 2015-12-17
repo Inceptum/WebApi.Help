@@ -2,7 +2,7 @@ using System;
 
 namespace Inceptum.WebApi.Help.Common
 {
-    public class ValueHolder
+    internal class ValueHolder
     {
         private readonly object m_Value;
 
