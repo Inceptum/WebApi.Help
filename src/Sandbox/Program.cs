@@ -41,6 +41,7 @@ namespace Sandbox
             config.Formatters.Remove(config.Formatters.XmlFormatter);
 
             config.Routes.MapHttpRoute("Default", "api/{controller}", new { controller = "Test" });
+            config.Routes.MapHttpRoute("GetPersonContacts", "api/{version}/users/{id}/contacts", new { controller = "Echo", action = "GetContacts" }, new { version = "v[12]" });
 
             config.MapHttpAttributeRoutes();
 

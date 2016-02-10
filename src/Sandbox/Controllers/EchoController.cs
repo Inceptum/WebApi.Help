@@ -69,11 +69,15 @@ namespace Sandbox.Controllers
         /// <param name="id" lang="ru">Идентификатор пользователя</param>
         /// <remarks>Returns user's contact information by id of the user.</remarks>
         /// <remarks lang="ru">Возвращает контакты пользователя по его идентификатору.</remarks>
-        [HttpGet, Route("api/users/{id:int}/contacts")]
+        [HttpGet/*, Route("api/users/{id:int}/contacts")*/]
         [ApiExplorerOrder(Order = 5)]
         public Contact GetContacts(int? id)
         {
-            return new Contact();
+            return new Contact()
+            {
+                Email = "test@mail.ru",
+                Phone = "1234567890"
+            };
         }
 
         /// <summary>Create a user.</summary>

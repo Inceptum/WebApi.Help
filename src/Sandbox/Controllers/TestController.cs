@@ -15,13 +15,13 @@ namespace Sandbox.Controllers
     public class TestController : ApiController
     {
         /// <summary>
-        /// Test get method
+        /// Test get method v2
         /// </summary>        
         /// <summary lang="ru">
-        /// Тестовый GET метод
+        /// Тестовый GET метод v2
         /// </summary>        
         [HttpGet, Route("api/v2/test")]
-        public User Get()
+        public User GetV2()
         {
             return new User();
         }

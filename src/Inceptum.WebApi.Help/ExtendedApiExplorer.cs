@@ -33,6 +33,21 @@ namespace Inceptum.WebApi.Help
             initializeDependencies();
         }
 
+        /// <summary>
+        /// When set to <c>true</c> will ignore query string parameters that appears from route template and doesn't map to any of action parameters.
+        /// <code>
+        /// // Consider the route configured as: 
+        /// config.Routes.MapHttpRoute("TestRoute", "api/{version}/users/{id}", new { controller = "Users", action = "Get" }, new { version = "v[12]" /* Version constraint */ });
+        /// 
+        /// // And corresponding action is:
+        /// public User Get(int id /* No version parameter here! */) {
+        ///     // ...
+        /// }
+        /// // Then the {version} parameter will not appear in the documentation.
+        /// </code>
+        /// </summary>
+        public bool IgnoreUndeclaredRouteParameters { get; set; }
+
         private void initializeDependencies()
         {
             m_DocumentationProvider = new Lazy<IExtendedDocumentationProvider>(() =>
@@ -90,7 +105,7 @@ namespace Inceptum.WebApi.Help
             var apiDescriptionEx = new ExtendedApiDescription(apiDescription)
                 {
                     Controller = DocumentationProvider.GetName(apiDescription.ActionDescriptor.ControllerDescriptor) ?? apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName,
-                    DisplayName = DocumentationProvider.GetName(apiDescription.ActionDescriptor) ?? string.Format("{0} {1}", apiDescription.HttpMethod.Method, apiDescription.RelativePath)                    
+                    DisplayName = DocumentationProvider.GetName(apiDescription.ActionDescriptor) ?? string.Format("{0} {1}", apiDescription.HttpMethod.Method, apiDescription.RelativePath)
                 };
 
             GenerateUriParameters(apiDescriptionEx);
@@ -146,8 +161,11 @@ namespace Inceptum.WebApi.Help
                     // If parameterDescriptor is null, this is an undeclared route parameter which only occurs
                     // when source is FromUri. Ignored in request model and among resource parameters but listed
                     // as a simple string here.
-                    ModelDescription modelDescription = ModelDescriptionGenerator.GetOrCreateModelDescription(typeof(string));
-                    AddParameterDescription(apiDescription, apiParameter, modelDescription);
+                    if (!IgnoreUndeclaredRouteParameters)
+                    {
+                        ModelDescription modelDescription = ModelDescriptionGenerator.GetOrCreateModelDescription(typeof(string));
+                        AddParameterDescription(apiDescription, apiParameter, modelDescription);
+                    }
                 }
 
             }

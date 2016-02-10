@@ -31,7 +31,7 @@ namespace Inceptum.WebApi.Help
             if (httpConfiguration == null) throw new ArgumentNullException("httpConfiguration");
             m_HttpConfiguration = httpConfiguration;
             var srvLocator = new ServiceLocatorImpl();
-            srvLocator.Register<IExtendedApiExplorer>(() => new ExtendedApiExplorer(m_HttpConfiguration));
+            srvLocator.Register<IExtendedApiExplorer>(() => new ExtendedApiExplorer(m_HttpConfiguration) { IgnoreUndeclaredRouteParameters = true });
             srvLocator.Register<IExtendedDocumentationProvider>(() => new XmlDocumentationProvider());
             srvLocator.Register<IContentProvider>(() => new LocalizableContentProvider(new EmbeddedResourcesContentProvider()));
             srvLocator.Register(createDefaultHelpProvider);
